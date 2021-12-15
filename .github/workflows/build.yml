@@ -23,13 +23,13 @@ jobs:
         ARCH: x86_64
       run: |
         sed -i "/Exit if user isn't root/aVERSION='$(cat version)'" build.sh
-        sudo build.sh
+        sudo ./build.sh
     - 
       name: Build for x86
       env:
         ARCH: x86
       run: |
-        sudo build.sh
+        sudo ./build.sh
     -
       name: Upload artifacts
       uses: actions/upload-artifact@v2

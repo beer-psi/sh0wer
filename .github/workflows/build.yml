@@ -1,0 +1,37 @@
+name: Build yacd
+
+on: push
+
+jobs:
+  build:
+    if: "!contains(github.event.head_commit.message, 'skip-ci')" 
+    runs-on: ubuntu-latest
+    steps:
+    - 
+      name: Checkout
+      uses: actions/checkout@v2
+    -
+      name: Install build dependencies
+      run: |
+        apt-get install -y --no-install-recommends wget grub-pc-bin \
+          grub-efi-amd64-bin mtools squashfs-tools xorriso ca-certificates curl \
+          xz-utils libc6-dev
+
+    - 
+      name: Build for x86_64
+      env:
+        ARCH: x86_64
+      run: |
+        sed -i "/Exit if user isn't root/aVERSION='$(cat version)'" build.sh
+        sudo build.sh
+    - 
+      name: Build for x86
+      env:
+        ARCH: x86
+      run: |
+        sudo build.sh
+    -
+      name: Upload artifacts
+      uses: actions/upload-artifact@v2
+      with:
+        path: out/*

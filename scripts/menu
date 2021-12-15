@@ -1,0 +1,45 @@
+#!/bin/sh
+. /usr/local/bin/common
+
+height="$(($(tput lines) - 6))"
+width="$(($(tput cols) - 20))"
+
+while true; do
+    SELECTION=$(dialog --colors  --title 'yacd' --menu '' $height $width 6 \
+        1 checkra1n \
+        2 odysseyra1n \
+        3 SSH \
+        4 Shell \
+        5 Shutdown \
+        6 Reboot 3>&1 1>&2 2>&3 3>&-)
+    case "$SELECTION" in
+    1) 
+        clear
+        /usr/local/bin/checkra1n
+        ;;
+    2)
+        clear
+        /usr/local/bin/odysseyra1n
+        ;;
+    3)
+        clear
+        /usr/local/bin/ssh_ios
+        ;;
+    4)
+        clear
+        break
+        ;;
+    5)
+        clear
+        yacd_logo
+        sleep 2
+        /sbin/halt -d 0
+        ;;
+    6) 
+        clear
+        yacd_logo
+        sleep 2
+        /sbin/reboot -d 0
+        ;;
+    esac
+done

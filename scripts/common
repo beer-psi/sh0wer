@@ -1,0 +1,75 @@
+# This is a library for other scripts, it is not supposed to be run by itself
+# Thus, it doesn't need a shebang
+# shellcheck disable=SC2148
+
+bold=$(tput bold)
+normal=$(tput sgr0)
+green=$(tput setaf 2)
+red=$(tput setaf 1)
+blue=$(tput setaf 4)
+
+INFO_ARROW="${bold}${blue}==>${normal}"
+FAILED_ARROW="${bold}${red}==>${normal}"
+SUCCESS_ARROW="${bold}${green}==>${normal}"
+SUB_INFO_ARROW="   ${bold}${blue}->${normal}"
+SUB_FAILED_ARROW="   ${bold}${red}->${normal}"
+
+info_echo(){
+    echo "${INFO_ARROW} $1"
+}
+
+sub_info_echo(){
+    echo "${SUB_INFO_ARROW} $1"
+}
+
+failed_echo(){
+    echo "${FAILED_ARROW} ${red}$1${normal}"
+}
+
+sub_failed_echo(){
+    echo "${SUB_FAILED_ARROW} ${red}$1${normal}"
+}
+
+success_echo(){
+    echo "${SUCCESS_ARROW} ${green}$1${normal}"
+}
+
+enter_to_quit() {
+    kill "$IPROXY" "$CHECKRA1N" > /dev/null 2>&1
+    printf 'Press enter to quit'
+    read -r
+}
+
+odysseyra1n_logo() {
+    echo "	           _                                    _"
+    echo "	  ___   __| |_   _ ___ ___  ___ _   _ _ __ __ _/ |_ __"
+    echo "	 / _ \ / _  | | | / __/ __|/ _ \ | | | '__/ _  | | '_ \\"
+    echo "	| (_) | (_| | |_| \__ \__ \  __/ |_| | | | (_| | | | | |"
+    echo "	 \___/ \__,_|\__, |___/___/\___|\__, |_|  \__,_|_|_| |_|"
+    echo "	             |___/              |___/ "
+}
+
+ssh_logo() {
+    echo "         _     "
+    echo " ___ ___| |__"
+    echo "/ __/ __| '_ \\"
+    echo "\__ \__ \ | | |"
+    echo "|___/___/_| |_|"
+}
+
+yacd_logo() {
+    echo '                     _ '
+    echo ' _   _  __ _  ___ __| |'
+    echo '| | | |/ _  |/ __/ _  |'
+    echo '| |_| | (_| | (_| (_| |'
+    echo ' \__, |\__,_|\___\__,_|'
+    echo ' |___/'
+    echo ''
+    echo 'Yet Another checkra1n Distribution'
+    echo '      by beerpsi'
+}
+    
+prompt() {
+  printf '%s' "$1"
+  read -r "$2"
+}

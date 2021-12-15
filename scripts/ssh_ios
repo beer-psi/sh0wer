@@ -1,0 +1,29 @@
+#!/bin/sh
+. /usr/local/bin/common
+clear
+
+cat << !
+Connect your device to this computer.
+Available users are:
+- mobile
+- root
+Default password is 'alpine', default checkra1n port is 44
+!
+
+prompt "User: " user
+prompt "Port: " port
+
+# shellcheck disable=SC2034,SC2154
+IPROXY=$(iproxy 4444 "${port}" >/dev/null 2>&1 & echo $!)
+
+clear
+
+info_echo "Connecting to your device via ssh..."
+# shellcheck disable=SC2154
+if ssh -p 4444 -o "StrictHostKeyChecking no" -o "UserKnownHostsFile=/dev/null" "${user}"@127.0.0.1; then
+    true
+else
+    failed_echo "Failed to ssh into your device!"
+fi
+
+enter_to_quit

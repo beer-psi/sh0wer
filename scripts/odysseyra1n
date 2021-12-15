@@ -1,0 +1,112 @@
+#!/bin/sh
+#
+# checkn1x odysseyra1n script
+# https://asineth.gq (original script by coolstar)
+#
+# ooo, formatting
+. /usr/local/bin/common
+cd /opt/odysseyra1n || failed_echo "/opt/odysseyra1n doesn't exist!"
+ip link set lo up
+clear
+
+cat << !
+Odysseyra1n Installation Script
+Copyright (C) 2021, CoolStar. All Rights Reserved
+This script was modified to work on yacd.
+
+# Before you begin:
+If you're currently jailbroken with a different bootstrap
+installed, you will need to Reset System via the Loader app,
+then rejailbreak with checkra1n but don't install Cydia from
+the Loader app.
+
+Connect your device.
+
+Press enter to continue.
+!
+read -r
+
+echo '#!/bin/bash' > odysseyra1n-install.bash
+cat << "EOF" >> odysseyra1n-install.bash
+if [[ -f "/.bootstrapped" ]]; then
+    echo "Error: Migration from other bootstraps is no longer supported."
+    rm ./bootstrap* ./*.deb odysseyra1n-install.bash
+    exit 1
+fi
+if [[ -f "/.installed_odyssey" ]]; then
+        echo "Error: Odysseyra1n is already installed."
+        rm ./bootstrap* ./*.deb odysseyra1n-install.bash
+        exit 1
+fi
+VER=$(/binpack/usr/bin/plutil -key ProductVersion /System/Library/CoreServices/SystemVersion.plist)
+if [[ "${VER%%.*}" -ge 12 ]] && [[ "${VER%%.*}" -lt 13 ]]; then
+    CFVER=1500
+elif [[ "${VER%%.*}" -ge 13 ]] && [[ "${VER%%.*}" -lt 14 ]]; then
+    CFVER=1600
+elif [[ "${VER%%.*}" -ge 14 ]] && [[ "${VER%%.*}" -lt 15 ]]; then
+    CFVER=1700
+else
+    echo "${VER} not compatible."
+    exit 1
+fi
+mount -o rw,union,update /dev/disk0s1s1
+rm -rf /etc/{alternatives,apt,ssl,ssh,dpkg,profile{,.d}} /Library/dpkg /var/{cache,lib}
+tar --preserve-permissions -xkf bootstrap_${CFVER}.tar -C /
+SNAPSHOT=$(snappy -s | cut -d ' ' -f 3 | tr -d '\n')
+snappy -f / -r "$SNAPSHOT" -t orig-fs > /dev/null 2>&1
+/prep_bootstrap.sh
+PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/bin/X11:/usr/games
+if [[ $VER = 12.1* ]] || [[ $VER = 12.0* ]]; then
+    dpkg -i org.swift.libswift_5.0-electra2_iphoneos-arm.deb > /dev/null
+fi
+echo "   -> Installing Sileo and upgrading Procursus packages..."
+dpkg -i org.coolstar.sileo_2.2.3_iphoneos-arm.deb > /dev/null
+uicache -p /Applications/Sileo.app
+mkdir -p /etc/apt/sources.list.d /etc/apt/preferences.d
+{
+    echo "Types: deb"
+    echo "URIs: https://repo.theodyssey.dev/"
+    echo "Suites: ./"
+    echo "Components: "
+    echo ""   
+} > /etc/apt/sources.list.d/odyssey.sources
+touch /var/lib/dpkg/available
+touch /.mount_rw
+touch /.installed_odyssey
+apt-get update -o Acquire::AllowInsecureRepositories=true
+apt-get dist-upgrade -y --allow-downgrades --allow-unauthenticated
+uicache -p /var/binpack/Applications/loader.app
+rm ./bootstrap* ./*.deb odysseyra1n-install.bash
+EOF
+
+# shellcheck disable=SC2034
+IPROXY=$(iproxy 4444 44 >/dev/null 2>&1 & echo $!)
+
+info_echo "Decompressing & copying resources to device"
+if xz -vcd odysseyra1n_resources.tar.xz | \
+    sshpass -p 'alpine' ssh -p4444 -o 'StrictHostKeyChecking no' -o 'UserKnownHostsFile=/dev/null' root@127.0.0.1 'cat | tar -vx';
+    sshpass -p 'alpine' scp -P4444 -o 'StrictHostKeyChecking no' -o 'UserKnownHostsFile=/dev/null' odysseyra1n-install.bash root@127.0.0.1:/var/root; then
+    sub_info_echo "Copied resources to your device."
+else
+    sub_failed_echo "Failed copying resources to your device!"
+    ERRORED=1
+fi
+
+
+
+info_echo "Bootstrapping device"
+if sshpass -p 'alpine' ssh -p4444 -o "StrictHostKeyChecking no" -o "UserKnownHostsFile=/dev/null" root@127.0.0.1 "bash /var/root/odysseyra1n-install.bash"; then
+    sub_info_echo "Bootstrapped your device."
+else
+    sub_failed_echo "Failed bootstrapping device!"
+    ERRORED=1
+fi
+
+if [ $ERRORED -eq "1" ]; then
+    failed_echo "The script failed! Please try again"
+else 
+    success_echo "Done!"
+    sub_info_echo "It is recommended that you update everything in Sileo."
+fi
+
+enter_to_quit

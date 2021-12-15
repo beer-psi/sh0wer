@@ -151,7 +151,7 @@ cp scripts/* work/chroot/usr/local/bin
 (
     cd work/chroot/usr/local/bin
     curl -sLO "$CHECKRA1N"
-    chmod a+x work/chroot/usr/local/bin/*
+    chmod a+x ./*
 )
 (
     cd work/chroot/opt/odysseyra1n

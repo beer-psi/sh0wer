@@ -13,7 +13,7 @@ jobs:
     -
       name: Install build dependencies
       run: |
-        apt-get install -y --no-install-recommends wget grub-pc-bin \
+        sudo apt-get install -y --no-install-recommends wget grub-pc-bin \
           grub-efi-amd64-bin mtools squashfs-tools xorriso ca-certificates curl \
           xz-utils libc6-dev
 

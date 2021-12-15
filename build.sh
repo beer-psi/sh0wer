@@ -16,19 +16,19 @@ CHECKRA1N_AMD64=""
 CHECKRA1N_I486=""
 SILEO=""
 [ -z "$AMD64_ROOTFS" ] && {
-    AMD64_ROOTFS=$(curl "https://alpinelinux.org/downloads/" | sed 's/&#x2F;/\//g' | grep -Po "https://dl-cdn\.alpinelinux\.org/alpine/v[\d.]+/releases/x86_64/alpine-minirootfs-[\d.]+-x86_64\.tar\.gz" | head -1)
+    AMD64_ROOTFS=$(curl -s "https://alpinelinux.org/downloads/" | sed 's/&#x2F;/\//g' | grep -Po "https://dl-cdn\.alpinelinux\.org/alpine/v[\d.]+/releases/x86_64/alpine-minirootfs-[\d.]+-x86_64\.tar\.gz" | head -1)
 }
 [ -z "$I486_ROOTFS" ] && {
-    I486_ROOTFS=$(curl "https://alpinelinux.org/downloads/" | sed 's/&#x2F;/\//g' | grep -Po "https://dl-cdn\.alpinelinux\.org/alpine/v[\d.]+/releases/x86/alpine-minirootfs-[\d.]+-x86\.tar\.gz" | head -1)
+    I486_ROOTFS=$(curl -s "https://alpinelinux.org/downloads/" | sed 's/&#x2F;/\//g' | grep -Po "https://dl-cdn\.alpinelinux\.org/alpine/v[\d.]+/releases/x86/alpine-minirootfs-[\d.]+-x86\.tar\.gz" | head -1)
 }
 [ -z "$CHECKRA1N_AMD64" ] && {
-    CHECKRA1N_AMD64=$(curl "https://checkra.in/releases/" | grep -Po "https://assets.checkra.in/downloads/linux/cli/x86_64/[0-9a-f]*/checkra1n")
+    CHECKRA1N_AMD64=$(curl -s "https://checkra.in/releases/" | grep -Po "https://assets.checkra.in/downloads/linux/cli/x86_64/[0-9a-f]*/checkra1n")
 }
 [ -z "$CHECKRA1N_I486" ] && {
-    CHECKRA1N_I486=$(curl "https://checkra.in/releases/" | grep -Po "https://assets.checkra.in/downloads/linux/cli/i486/[0-9a-f]*/checkra1n")
+    CHECKRA1N_I486=$(curl -s "https://checkra.in/releases/" | grep -Po "https://assets.checkra.in/downloads/linux/cli/i486/[0-9a-f]*/checkra1n")
 }
 [ -z "$SILEO" ] && {
-    SILEO="https://github.com$(curl https://github.com/Sileo/Sileo/releases | grep -Po "/Sileo\/Sileo/releases/download/[\d.]+/org\.coolstar\.sileo_[\d.]+_iphoneos-arm\.deb" | head -1)"
+    SILEO="https://github.com$(curl -s https://github.com/Sileo/Sileo/releases | grep -Po "/Sileo\/Sileo/releases/download/[\d.]+/org\.coolstar\.sileo_[\d.]+_iphoneos-arm\.deb" | head -1)"
 }
 
 # Stage 1: User input
@@ -132,7 +132,6 @@ depmod -b work/chroot "$(basename "$(find work/chroot/lib/modules/* -maxdepth 0)
         sbin/apk \
         etc/resolv.conf \
     rm -rf tmp \
-        boot \
         var/log \
         var/cache \
         var/lib/apk \
@@ -207,7 +206,8 @@ umount work/chroot/proc
 umount work/chroot/sys
 umount work/chroot/dev
 cp work/chroot/boot/vmlinuz-lts work/iso/boot
-cp work/chroot/initramfs-lts work/iso/boot
+cp work/chroot/boot/initramfs-lts work/iso/boot
+rm -rf work/chroot/boot
 mksquashfs work/chroot work/iso/live/filesystem.squashfs -noappend -e boot -comp xz -Xbcj x86 -Xdict-size 100%
 
 ## Creates output ISO dir (easier for GitHub Actions)

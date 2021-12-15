@@ -44,15 +44,20 @@ until [ "$ARCH" = 'x86_64' ] || [ "$ARCH" = 'x86' ]; do
     read -r input_arch
     [ "$input_arch" = 1 ] || [ -z "$input_arch" ] && {
         ARCH='x86_64'
-        ROOTFS="$AMD64_ROOTFS"
-        CHECKRA1N="$AMD64_CHECKRA1N"
     }
     [ "$input_arch" = 2 ] && {
         ARCH='x86'
-        ROOTFS="$I486_ROOTFS"
-        CHECKRA1N="$I486_CHECKRA1N"
     }
 done
+
+[ "$ARCH" = "x86_64" ] && {
+    ROOTFS="$AMD64_ROOTFS"
+    CHECKRA1N="$CHECKRA1N_AMD64"
+}
+[ "$ARCH" = "x86" ] && {
+    ROOTFS="$I486_ROOTFS"
+    CHECKRA1N="$CHECKRA1N_I486"
+}
 
 # Stage 2: Preparations
 # * Deletes old build attempts

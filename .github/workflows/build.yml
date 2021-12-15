@@ -23,6 +23,7 @@ jobs:
         ARCH: x86_64
       run: |
         sed -i "/Exit if user isn't root/aVERSION='$(cat version)'" build.sh
+        ls -lha
         sudo -E ./build.sh
     - 
       name: Build for x86

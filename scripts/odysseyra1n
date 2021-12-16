@@ -84,6 +84,7 @@ EOF
 IPROXY=$(iproxy 4444 44 >/dev/null 2>&1 & echo $!)
 
 info_echo "Decompressing & copying resources to device"
+sub_info_echo "Default password is: 'alpine'"
 if xz -vcd odysseyra1n_resources.tar.xz | \
     sshpass -p 'alpine' ssh -p4444 -o 'StrictHostKeyChecking no' -o 'UserKnownHostsFile=/dev/null' root@127.0.0.1 'cat | tar -vx';
     sshpass -p 'alpine' scp -P4444 -o 'StrictHostKeyChecking no' -o 'UserKnownHostsFile=/dev/null' odysseyra1n-install.bash root@127.0.0.1:/var/root; then
@@ -96,6 +97,7 @@ fi
 
 
 info_echo "Bootstrapping device"
+sub_info_echo "Default password is: 'alpine'"
 if sshpass -p 'alpine' ssh -p4444 -o "StrictHostKeyChecking no" -o "UserKnownHostsFile=/dev/null" root@127.0.0.1 "bash /var/root/odysseyra1n-install.bash"; then
     sub_info_echo "Bootstrapped your device."
 else

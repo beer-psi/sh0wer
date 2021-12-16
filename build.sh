@@ -10,6 +10,7 @@
 # Stage 0: Get download links
 # * If any link is filled, the script will download from that link.
 # * If empty, get the latest version from the website.
+KERNEL_MODULES="modules"
 CHECKRA1N_AMD64=""
 CHECKRA1N_I486=""
 SILEO=""
@@ -100,12 +101,12 @@ apt purge apt -y --allow-remove-essential
 sed -i 's/COMPRESS=gzip/COMPRESS=xz/' work/chroot/etc/initramfs-tools/initramfs.conf
 
 # # Strip unneeded kernel modules
-sed -i '/^[[:blank:]]*#/d;s/#.*//;/^$/d' modules.order.test
+sed -i '/^[[:blank:]]*#/d;s/#.*//;/^$/d' $KERNEL_MODULES
 modules_to_keep=()
 while IFS="" read -r p || [ -n "$p" ]
 do
   modules_to_keep+=("-not" "-name" "$p") 
-done < modules.order.test
+done < $KERNEL_MODULES
 find work/chroot/lib/modules/* -type f "${modules_to_keep[@]}" -delete
 find work/chroot/lib/modules/* -type d -empty -delete
 

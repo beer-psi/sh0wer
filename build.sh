@@ -110,7 +110,7 @@ done < $KERNEL_MODULES
 find work/chroot/lib/modules/*/kernel/* -type f "${modules_to_keep[@]}" -delete
 find work/chroot/lib/modules/*/kernel/* -type d -empty -delete
 
-Compress kernel modules
+# Compress kernel modules
 find work/chroot/lib/modules/*/kernel/* -type f -name "*.ko" -exec strip --strip-unneeded {} +
 find work/chroot/lib/modules/*/kernel/* -type f -name "*.ko" -exec xz --x86 -e9T0 {} +
 depmod -b work/chroot "$(basename "$(find work/chroot/lib/modules/* -maxdepth 0)")"

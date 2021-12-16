@@ -37,7 +37,8 @@ success_echo(){
 enter_to_quit() {
     kill "$IPROXY" "$CHECKRA1N" > /dev/null 2>&1
     printf 'Press enter to quit'
-    read -r
+    # shellcheck disable=SC2034
+    read -r null
 }
 
 odysseyra1n_logo() {

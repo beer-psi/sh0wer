@@ -24,7 +24,8 @@ Connect your device.
 
 Press enter to continue.
 !
-read -r
+# shellcheck disable=SC2034
+read -r null
 
 echo '#!/bin/bash' > odysseyra1n-install.bash
 cat << "EOF" >> odysseyra1n-install.bash

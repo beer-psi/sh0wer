@@ -94,13 +94,10 @@ export DEBIAN_FRONTEND=noninteractive
 # Install requiered packages
 apt-get install -y --no-install-recommends linux-image-$KERNEL_ARCH live-boot \
     systemd systemd-sysv usbmuxd libusbmuxd-tools openssh-client sshpass xz-utils dialog
-
-# Remove unnecessary "essential" packages
-dpkg -P --force-all apt
 !
 sed -i 's/COMPRESS=gzip/COMPRESS=xz/' work/chroot/etc/initramfs-tools/initramfs.conf
 
-# # Strip unneeded kernel modules
+# Strip unneeded kernel modules
 sed -i '/^[[:blank:]]*#/d;s/#.*//;/^$/d' $KERNEL_MODULES
 modules_to_keep=()
 while IFS="" read -r p || [ -n "$p" ]
@@ -110,17 +107,16 @@ done < $KERNEL_MODULES
 find work/chroot/lib/modules/*/kernel/* -type f "${modules_to_keep[@]}" -delete
 find work/chroot/lib/modules/*/kernel/* -type d -empty -delete
 
-# Compress kernel modules
+# Compress remaining kernel modules
 find work/chroot/lib/modules/*/kernel/* -type f -name "*.ko" -exec strip --strip-unneeded {} +
 find work/chroot/lib/modules/*/kernel/* -type f -name "*.ko" -exec xz --x86 -e9T0 {} +
 depmod -b work/chroot "$(basename "$(find work/chroot/lib/modules/* -maxdepth 0)")"
 
-# Do I have to rebuild the initramfs?
 chroot work/chroot update-initramfs -u
 
 # Remove unneeded files and folders
 cat << ! | chroot work/chroot /usr/bin/env PATH=/usr/bin:/bin:/usr/sbin:/sbin /bin/bash
-dpkg -P --force-all cpio gzip libgpm2
+dpkg -P --force-all cpio gzip libgpm2 apt
 dpkg -P --force-all initramfs-tools initramfs-tools-core 
 dpkg -P --force-all debconf libdebconfclient0
 dpkg -P --force-all init-system-helpers
@@ -210,7 +206,8 @@ export DIALOGRC=/root/.dialogrc
 /usr/local/bin/menu
 !
 
-# Build the ISO
+# Stage 4: Build the ISO
+# * Make an xz-compressed squashfs
 umount work/chroot/proc
 umount work/chroot/sys
 umount work/chroot/dev

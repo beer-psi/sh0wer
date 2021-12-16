@@ -113,6 +113,9 @@ find work/chroot/lib/modules/* -type f -name "*.ko" -exec strip --strip-unneeded
 find work/chroot/lib/modules/* -type f -name "*.ko" -exec xz --x86 -e9T0 {} +
 depmod -b work/chroot "$(basename "$(find work/chroot/lib/modules/* -maxdepth 0)")"
 
+# Do I have to rebuild the initramfs?
+chroot work/chroot update-initramfs -u
+
 # Remove unneeded files and folders
 (
     cd work/chroot

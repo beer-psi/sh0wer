@@ -24,7 +24,7 @@ tab_len = 0
 visit_items = OFF
 
 # Shadow dialog boxes? This also turns on color.
-use_shadow = ON
+use_shadow = OFF
 
 # Turn color support ON or OFF
 use_colors = ON

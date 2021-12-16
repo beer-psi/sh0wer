@@ -96,12 +96,7 @@ apt-get install -y --no-install-recommends linux-image-$KERNEL_ARCH live-boot \
     systemd systemd-sysv usbmuxd libusbmuxd-tools openssh-client sshpass xz-utils dialog
 
 # Remove unnecessary "essential" packages
-dpkg -P --force-all apt e2fsprogs 
-dpkg -P --force-all cpio 
-dpkg -P --force-all initramfs-tools initramfs-tools-core 
-dpkg -P --force-all debconf libdebconfclient0
-dpkg -P --force-all init-system-helpers
-dpkg -P --force-all dpkg perl-base
+dpkg -P --force-all apt
 !
 sed -i 's/COMPRESS=gzip/COMPRESS=xz/' work/chroot/etc/initramfs-tools/initramfs.conf
 
@@ -124,6 +119,13 @@ depmod -b work/chroot "$(basename "$(find work/chroot/lib/modules/* -maxdepth 0)
 chroot work/chroot update-initramfs -u
 
 # Remove unneeded files and folders
+cat << ! | chroot work/chroot /usr/bin/env PATH=/usr/bin:/bin:/usr/sbin:/sbin /bin/bash
+dpkg -P --force-all cpio 
+dpkg -P --force-all initramfs-tools initramfs-tools-core 
+dpkg -P --force-all debconf libdebconfclient0
+dpkg -P --force-all init-system-helpers
+dpkg -P --force-all dpkg perl-base
+!
 (
     cd work/chroot
     # Empty some directories to make the system smaller

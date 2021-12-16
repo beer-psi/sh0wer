@@ -28,7 +28,6 @@ while true; do
     4)
         clear
         echo "Go back to the menu by running 'menu'."
-        sleep 2
         break
         ;;
     5)

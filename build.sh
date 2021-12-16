@@ -190,12 +190,47 @@ initrd /boot/initrd.img
 boot
 !
 
-# Change hostname and configure .bashrc
+# * Change hostname 
+# * configure .bashrc
+# * configure .dialogrc
 echo 'yacd' > work/chroot/etc/hostname
 cat << ! > work/chroot/root/.bashrc
 export VERSION='$VERSION'
 export DIALOGRC=/root/.dialogrc
 /usr/local/bin/menu
+!
+cat << ! > work/chroot/root/.dialogrc
+use_shadow = OFF
+use_colors = ON
+screen_color = (RED,BLACK,ON)
+shadow_color = (BLACK,BLACK,OFF)
+dialog_color = (WHITE,BLACK,OFF)
+title_color = (RED,BLACK,OFF)
+border_color = (BLACK,BLACK,ON)
+button_active_color = (BLACK,RED,OFF)
+button_inactive_color = (YELLOW,BLACK,OFF)
+button_key_active_color = (BLACK,RED,ON)
+button_key_inactive_color = (RED,BLACK,OFF)
+button_label_active_color = (WHITE,RED,OFF)
+button_label_inactive_color = (BLACK,BLACK,ON)
+inputbox_color = (YELLOW,BLACK,OFF)
+inputbox_border_color = (YELLOW,BLACK,OFF)
+searchbox_color = (YELLOW,BLACK,OFF)
+searchbox_title_color = (YELLOW,BLACK,ON)
+searchbox_border_color = (BLACK,BLACK,ON)
+position_indicator_color = (RED,BLACK,OFF)
+menubox_color = (YELLOW,BLACK,OFF)
+menubox_border_color = (BLACK,BLACK,ON)
+item_color = (WHITE,BLACK,OFF)
+item_selected_color = (BLACK,RED,OFF)
+tag_color = (YELLOW,BLACK,OFF)
+tag_selected_color = (BLACK,RED,OFF)
+tag_key_color = (RED,BLACK,OFF)
+tag_key_selected_color = (BLACK,RED,ON)
+check_color = (YELLOW,BLACK,OFF)
+check_selected_color = (BLACK,RED,ON)
+uarrow_color = (RED,BLACK,OFF)
+darrow_color = (RED,BLACK,OFF)
 !
 
 # Build the ISO

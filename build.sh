@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 # YACD - Yet Another checkra1n Distribution
 
 # Exit if user isn't root
@@ -101,20 +101,14 @@ sed -i 's/COMPRESS=gzip/COMPRESS=xz/' work/chroot/etc/initramfs-tools/initramfs.
 chroot work/chroot update-initramfs -u
 
 # # Strip unneeded kernel modules
-# cat << ! > work/chroot/etc/mkinitfs/features.d/checkn1x.modules
-# kernel/drivers/usb/host
-# kernel/drivers/hid/usbhid
-# kernel/drivers/hid/hid-generic.ko
-# kernel/drivers/hid/hid-cherry.ko
-# kernel/drivers/hid/hid-apple.ko
-# kernel/net/ipv4
-# !
-# chroot work/chroot /usr/bin/env PATH=/usr/bin:/bin:/usr/sbin:/sbin /sbin/mkinitfs -F "checkn1x" -k -t /tmp -q "$(basename "$(find work/chroot/lib/modules/* -maxdepth 0)")"
-# rm -rf work/chroot/lib/modules
-# mv work/chroot/tmp/lib/modules work/chroot/lib
+modules_to_keep=()
+while IFS="" read -r p || [ -n "$p" ]
+do
+  modules_to_keep+=("-not" "-name" "$p") 
+done < modules.order
+find work/chroot/lib/modules/*/kernel "${modules_to_keep[@]}" -delete
 
 # Compress kernel modules
-find work/chroot/lib/modules/* -type f -name "*.ko.gz" -exec gzip -d {} +
 find work/chroot/lib/modules/* -type f -name "*.ko" -exec strip --strip-unneeded {} +
 find work/chroot/lib/modules/* -type f -name "*.ko" -exec xz --x86 -e9T0 {} +
 depmod -b work/chroot "$(basename "$(find work/chroot/lib/modules/* -maxdepth 0)")"

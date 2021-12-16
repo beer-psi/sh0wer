@@ -1,28 +1,43 @@
+# kernel/drivers/usb/host
 usbhid.ko
+
+# kernel/drivers/hid
 hid.ko
-mmc_core.ko
-pcmcia.ko
-pcmcia_core.ko
-ssb.ko
+hid-generic.ko
+hid-apple.ko
+hid-cherry.ko
+
+# kernel/net/ipv4
+udp_tunnel.ko
+
+# kernel/drivers/usb
 usb-common.ko
 usbcore.ko
 ehci-hcd.ko
 ehci-pci.ko
 ehci-platform.ko
-isp116x-hcd.ko
 ohci-hcd.ko
 ohci-pci.ko
 ohci-platform.ko
-oxu210hp-hcd.ko
-r8a66597-hcd.ko
-sl811-hcd.ko
-sl811_cs.ko
-squashfs.ko
-ssb-hcd.ko
-u132-hcd.ko
 uhci-hcd.ko
 xhci-hcd.ko
 xhci-pci-renesas.ko
 xhci-pci.ko
 xhci-plat-hcd.ko
+
+# kernel/fs/squashfs
+squashfs.ko
+
+# Others
+mmc_core.ko
+pcmcia.ko
+pcmcia_core.ko
+ssb.ko
+isp116x-hcd.ko
+oxu210hp-hcd.ko
+r8a66597-hcd.ko
+sl811-hcd.ko
+sl811_cs.ko
+ssb-hcd.ko
+u132-hcd.ko
 ftdi-elan.ko

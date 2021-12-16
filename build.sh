@@ -100,6 +100,7 @@ apt purge apt -y --allow-remove-essential
 sed -i 's/COMPRESS=gzip/COMPRESS=xz/' work/chroot/etc/initramfs-tools/initramfs.conf
 
 # # Strip unneeded kernel modules
+sed -i '/^[[:blank:]]*#/d;s/#.*//;/^$/d' modules.order.test
 modules_to_keep=()
 while IFS="" read -r p || [ -n "$p" ]
 do

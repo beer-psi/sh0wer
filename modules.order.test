@@ -25,8 +25,27 @@ xhci-pci-renesas.ko
 xhci-pci.ko
 xhci-plat-hcd.ko
 
-# kernel/fs/squashfs
+# kernel/drivers/ata
+ata_piix.ko
+libata.ko
+
+# kernel/drivers/message/fusion
+mptscsih.ko
+mptbase.ko
+
+# kernel/drivers/scsi
+scsi_transport_spi.ko
+sr_mod.ko
+scsi_mod.ko
+
+# kernel/drivers
+cdrom.ko
+loop.ko
+
+# kernel/fs
 squashfs.ko
+overlay.ko
+isofs.ko
 
 # Others
 mmc_core.ko

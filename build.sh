@@ -106,7 +106,7 @@ while IFS="" read -r p || [ -n "$p" ]
 do
   modules_to_keep+=("-not" "-name" "$p") 
 done < modules.order
-find work/chroot/lib/modules/*/kernel/* "${modules_to_keep[@]}" -delete
+find work/chroot/lib/modules/*/kernel/* -type f "${modules_to_keep[@]}" -delete
 
 # Compress kernel modules
 find work/chroot/lib/modules/* -type f -name "*.ko" -exec strip --strip-unneeded {} +

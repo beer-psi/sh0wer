@@ -101,14 +101,14 @@ apt purge apt -y --allow-remove-essential
 sed -i 's/COMPRESS=gzip/COMPRESS=xz/' work/chroot/etc/initramfs-tools/initramfs.conf
 
 # # Strip unneeded kernel modules
-sed -i '/^[[:blank:]]*#/d;s/#.*//;/^$/d' $KERNEL_MODULES
-modules_to_keep=()
-while IFS="" read -r p || [ -n "$p" ]
-do
-  modules_to_keep+=("-not" "-name" "$p") 
-done < $KERNEL_MODULES
-find work/chroot/lib/modules/* -type f "${modules_to_keep[@]}" -delete
-find work/chroot/lib/modules/* -type d -empty -delete
+#sed -i '/^[[:blank:]]*#/d;s/#.*//;/^$/d' $KERNEL_MODULES
+#modules_to_keep=()
+#while IFS="" read -r p || [ -n "$p" ]
+#do
+#  modules_to_keep+=("-not" "-name" "$p") 
+#done < $KERNEL_MODULES
+#find work/chroot/lib/modules/* -type f "${modules_to_keep[@]}" -delete
+#find work/chroot/lib/modules/* -type d -empty -delete
 
 # Compress kernel modules
 find work/chroot/lib/modules/* -type f -name "*.ko" -exec strip --strip-unneeded {} +

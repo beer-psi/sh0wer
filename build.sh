@@ -10,17 +10,9 @@
 # Stage 0: Get download links
 # * If any link is filled, the script will download from that link.
 # * If empty, get the latest version from the website.
-AMD64_ROOTFS=""
-I486_ROOTFS=""
 CHECKRA1N_AMD64=""
 CHECKRA1N_I486=""
 SILEO=""
-[ -z "$AMD64_ROOTFS" ] && {
-    AMD64_ROOTFS=$(curl -s "https://alpinelinux.org/downloads/" | sed 's/&#x2F;/\//g' | grep -Po "https://dl-cdn\.alpinelinux\.org/alpine/v[\d.]+/releases/x86_64/alpine-minirootfs-[\d.]+-x86_64\.tar\.gz" | head -1)
-}
-[ -z "$I486_ROOTFS" ] && {
-    I486_ROOTFS=$(curl -s "https://alpinelinux.org/downloads/" | sed 's/&#x2F;/\//g' | grep -Po "https://dl-cdn\.alpinelinux\.org/alpine/v[\d.]+/releases/x86/alpine-minirootfs-[\d.]+-x86\.tar\.gz" | head -1)
-}
 [ -z "$CHECKRA1N_AMD64" ] && {
     CHECKRA1N_AMD64=$(curl -s "https://checkra.in/releases/" | grep -Po "https://assets.checkra.in/downloads/linux/cli/x86_64/[0-9a-f]*/checkra1n")
 }
@@ -51,11 +43,16 @@ until [ "$ARCH" = 'x86_64' ] || [ "$ARCH" = 'x86' ]; do
 done
 
 [ "$ARCH" = "x86_64" ] && {
-    ROOTFS="$AMD64_ROOTFS"
+    REPO_ARCH="amd64"
+    KERNEL_ARCH="amd64"
     CHECKRA1N="$CHECKRA1N_AMD64"
 }
 [ "$ARCH" = "x86" ] && {
-    ROOTFS="$I486_ROOTFS"
+    dpkg --add-architecture i386
+    apt-get update
+    apt install -y --no-install-recommends libusb-1.0-0-dev:i386 gcc-multilib
+    REPO_ARCH="i386"
+    KERNEL_ARCH="686"
     CHECKRA1N="$CHECKRA1N_I486"
 }
 
@@ -83,44 +80,41 @@ start_time="$(date -u +%s)"
 #   * Stripping unneeded kernel modules
 #   * Remove unneeded files and directories
 mkdir -p work/chroot work/iso/live work/iso/boot/grub
-curl -sL "$ROOTFS" | tar -xzC work/chroot
+debootstrap --variant=minbase --arch="$REPO_ARCH" stable work/chroot 'http://deb.debian.org/debian/'
 mount --bind /proc work/chroot/proc
 mount --bind /sys work/chroot/sys
 mount --bind /dev work/chroot/dev
 cp /etc/resolv.conf work/chroot/etc
-sed -i 's/v3\.15\/community/edge\/community/g' work/chroot/etc/apk/repositories
-echo "http://dl-cdn.alpinelinux.org/alpine/edge/testing" >> work/chroot/etc/apk/repositories
 
-cat << ! | chroot work/chroot /usr/bin/env PATH=/usr/bin:/bin:/usr/sbin:/sbin /bin/sh
-# Installs required packages
-apk upgrade
-apk add alpine-base ncurses ncurses-terminfo-base xz eudev usbmuxd libusbmuxd-progs openssh-client sshpass usbutils dialog linux-lts linux-firmware-none util-linux
+cat << ! | chroot work/chroot /usr/bin/env PATH=/usr/bin:/bin:/usr/sbin:/sbin /bin/bash
+# Set debian frontend to noninteractive
+export DEBIAN_FRONTEND=noninteractive
 
-# Configure services
-rc-update add bootmisc
-rc-update add hwdrivers
-rc-update add networking
-rc-update add udev
-rc-update add udev-trigger
-rc-update add udev-settle
-rc-update add local
+# Install requiered packages
+apt-get install -y --no-install-recommends linux-image-$KERNEL_ARCH live-boot \
+  systemd systemd-sysv usbmuxd libusbmuxd-tools openssh-client sshpass xz-utils dialog
 
-# Make mkinitfs use highest level of compression possible
-sed -i 's/xz -C crc32 -T 0/xz -C crc32 --x86 -e9 -T0/g' /sbin/mkinitfs
+# Remove apt as it won't be usable anymore
+apt purge apt -y --allow-remove-essential
 !
+sed -i 's/COMPRESS=gzip/COMPRESS=xz/' work/chroot/etc/initramfs-tools/initramfs.conf
+chroot work/chroot update-initramfs -u
 
-# Strip unneeded kernel modules
-cat << ! > work/chroot/etc/mkinitfs/features.d/checkn1x.modules
-kernel/drivers/usb/host
-kernel/drivers/hid/usbhid
-kernel/drivers/hid/hid-generic.ko
-kernel/drivers/hid/hid-cherry.ko
-kernel/drivers/hid/hid-apple.ko
-kernel/net/ipv4
-!
-chroot work/chroot /usr/bin/env PATH=/usr/bin:/bin:/usr/sbin:/sbin /sbin/mkinitfs -F "checkn1x" -k -t /tmp -q "$(basename "$(find work/chroot/lib/modules/* -maxdepth 0)")"
-rm -rf work/chroot/lib/modules
-mv work/chroot/tmp/lib/modules work/chroot/lib
+# # Strip unneeded kernel modules
+# cat << ! > work/chroot/etc/mkinitfs/features.d/checkn1x.modules
+# kernel/drivers/usb/host
+# kernel/drivers/hid/usbhid
+# kernel/drivers/hid/hid-generic.ko
+# kernel/drivers/hid/hid-cherry.ko
+# kernel/drivers/hid/hid-apple.ko
+# kernel/net/ipv4
+# !
+# chroot work/chroot /usr/bin/env PATH=/usr/bin:/bin:/usr/sbin:/sbin /sbin/mkinitfs -F "checkn1x" -k -t /tmp -q "$(basename "$(find work/chroot/lib/modules/* -maxdepth 0)")"
+# rm -rf work/chroot/lib/modules
+# mv work/chroot/tmp/lib/modules work/chroot/lib
+
+# Compress kernel modules
+find work/chroot/lib/modules/* -type f -name "*.ko.gz" -exec gzip -d {} +
 find work/chroot/lib/modules/* -type f -name "*.ko" -exec strip --strip-unneeded {} +
 find work/chroot/lib/modules/* -type f -name "*.ko" -exec xz --x86 -e9T0 {} +
 depmod -b work/chroot "$(basename "$(find work/chroot/lib/modules/* -maxdepth 0)")"
@@ -128,20 +122,24 @@ depmod -b work/chroot "$(basename "$(find work/chroot/lib/modules/* -maxdepth 0)
 # Remove unneeded files and folders
 (
     cd work/chroot
-    rm -f root/.ash_history \
-        sbin/apk \
-        etc/resolv.conf \
-    rm -rf tmp \
-        var/log \
-        var/cache \
-        var/lib/apk \
-        usr/share/apk \
-        usr/share/man \
-        etc/apk \
-        etc/mtab \
+    # Empty some directories to make the system smaller
+    rm -f etc/mtab \
         etc/fstab \
-        etc/mkinitfs \
-        lib/apk
+        etc/ssh/ssh_host* \
+        root/.wget-hsts \
+        root/.bash_history
+    rm -rf var/log/* \
+        var/cache/* \
+        var/backups/* \
+        var/lib/apt/* \
+        var/lib/dpkg/* \
+        usr/share/doc/* \
+        usr/share/man/* \
+        usr/share/info/* \
+        usr/share/icons/* \
+        usr/share/locale/* \
+        usr/share/zoneinfo/* \
+        usr/lib/modules/*
 )
 
 # Copying scripts & Downloading resources
@@ -157,7 +155,7 @@ cp scripts/* work/chroot/usr/local/bin
     curl -sL -O https://github.com/coolstar/Odyssey-bootstrap/raw/master/bootstrap_1500.tar.gz \
         -O https://github.com/coolstar/Odyssey-bootstrap/raw/master/bootstrap_1600.tar.gz \
         -O https://github.com/coolstar/Odyssey-bootstrap/raw/master/bootstrap_1700.tar.gz \
-        -O https://github.com/coolstar/Odyssey-bootstrap/raw/master/org.coolstar.sileo_2.0.3_iphoneos-arm.deb \
+        -O "$SILEO" \
         -O https://github.com/coolstar/Odyssey-bootstrap/raw/master/org.swift.libswift_5.0-electra2_iphoneos-arm.deb
     # Rolling everything into one xz-compressed tarball (reduces size hugely)
     gzip -dv ./*.tar.gz
@@ -165,16 +163,14 @@ cp scripts/* work/chroot/usr/local/bin
     find ./* -not -name "odysseyra1n_resources.tar.xz" -exec rm {} +
 )
 
-# Fix ncurses
-cp -r work/chroot/etc/terminfo work/chroot/usr/share/terminfo
 
 # Configuring autologin
-cat << ! | chroot work/chroot /usr/bin/env PATH=/usr/bin:/bin:/usr/sbin:/sbin /bin/sh
-cd /etc/init.d
-
-echo 'agetty_options="--autologin root --noissue"' > /etc/conf.d/agetty-autologin
-ln -s agetty agetty-autologin.tty1
-rc-update add agetty-autologin.tty1 default
+mkdir -p work/chroot/etc/systemd/system/getty@tty1.service.d
+cat << ! > work/chroot/etc/systemd/system/getty@tty1.service.d/override.conf
+[Service]
+ExecStart=
+ExecStart=-/sbin/agetty --noissue --autologin root %I
+Type=idle
 !
 
 # Configure grub
@@ -190,8 +186,8 @@ echo ' |___/'
 echo ''
 echo 'Yet Another checkra1n Distribution'
 echo '      by beerpsi'
-linux /boot/vmlinuz-lts boot=live quiet
-initrd /boot/initramfs-lts
+linux /boot/vmlinuz boot=live
+initrd /boot/initrd.img
 boot
 !
 
@@ -199,15 +195,14 @@ boot
 echo 'yacd' > work/chroot/etc/hostname
 echo "export VERSION='$VERSION'" > work/chroot/root/.bashrc
 echo '/usr/local/bin/menu' >> work/chroot/root/.bashrc
-echo 'DIALOGRC=/root/.dialogrc' >> work/chroot/root/.bashrc
+# echo 'DIALOGRC=/root/.dialogrc' >> work/chroot/root/.bashrc
 
 # Build the ISO
 umount work/chroot/proc
 umount work/chroot/sys
 umount work/chroot/dev
-cp work/chroot/boot/vmlinuz-lts work/iso/boot
-cp work/chroot/boot/initramfs-lts work/iso/boot
-rm -rf work/chroot/boot
+cp work/chroot/vmlinuz work/iso/boot
+cp work/chroot/initrd.img work/iso/boot
 mksquashfs work/chroot work/iso/live/filesystem.squashfs -noappend -e boot -comp xz -Xbcj x86 -Xdict-size 100%
 
 ## Creates output ISO dir (easier for GitHub Actions)

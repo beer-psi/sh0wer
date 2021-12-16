@@ -120,7 +120,7 @@ chroot work/chroot update-initramfs -u
 
 # Remove unneeded files and folders
 cat << ! | chroot work/chroot /usr/bin/env PATH=/usr/bin:/bin:/usr/sbin:/sbin /bin/bash
-dpkg -P --force-all cpio 
+dpkg -P --force-all cpio gzip libgpm2
 dpkg -P --force-all initramfs-tools initramfs-tools-core 
 dpkg -P --force-all debconf libdebconfclient0
 dpkg -P --force-all init-system-helpers
@@ -150,8 +150,10 @@ dpkg -P --force-all dpkg perl-base
 )
 
 # Copying scripts & Downloading resources
-mkdir -p work/chroot/opt/odysseyra1n
+mkdir -p work/chroot/opt/odysseyra1n work/chroot/opt/a9x
 cp scripts/* work/chroot/usr/local/bin
+cp assets/.dialogrc work/chroot/root/.dialogrc
+cp assets/PongoConsolidated.bin work/chroot/opt/a9x
 (
     cd work/chroot/usr/local/bin
     curl -sLO "$CHECKRA1N"

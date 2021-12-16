@@ -4,39 +4,50 @@
 height="$(($(tput lines) - 6))"
 width="$(($(tput cols) - 20))"
 
+tput civis
 while true; do
-    SELECTION=$(dialog --colors  --title 'yacd' --menu '' $height $width 6 \
+    SELECTION=$(dialog --colors --no-cancel --title 'yacd' --menu '' $height $width 7 \
         1 checkra1n \
-        2 odysseyra1n \
-        3 SSH \
-        4 Shell \
-        5 Shutdown \
-        6 Reboot 3>&1 1>&2 2>&3 3>&-)
+        2 'checkra1n (A9X)' \
+        3 odysseyra1n \
+        4 SSH \
+        5 Shell \
+        6 Shutdown \
+        7 Reboot 3>&1 1>&2 2>&3 3>&-)
     case "$SELECTION" in
     1) 
         clear
+        tput cnorm
         /usr/local/bin/checkra1n
         ;;
     2)
         clear
-        /usr/local/bin/odysseyra1n
+        tput cnorm
+        /usr/local/bin/checkra1n -k /opt/a9x/PongoConsolidated.bin
         ;;
     3)
         clear
-        /usr/local/bin/ssh_ios
+        tput cnorm
+        /usr/local/bin/odysseyra1n
         ;;
     4)
         clear
+        tput cnorm
+        /usr/local/bin/ssh_ios
+        ;;
+    5)
+        clear
+        tput cnorm
         echo "Go back to the menu by running 'menu'."
         break
         ;;
-    5)
+    6)
         clear
         yacd_logo
         sleep 2
         /usr/sbin/halt -p
         ;;
-    6) 
+    7) 
         clear
         yacd_logo
         sleep 2

@@ -25,9 +25,15 @@ xhci-pci-renesas.ko
 xhci-pci.ko
 xhci-plat-hcd.ko
 
+## kernel/drivers/usb/storage
+uas.ko
+usb-storage.ko
+
 # kernel/drivers/ata
 ata_piix.ko
 libata.ko
+libahci.ko
+ahci.ko
 
 # kernel/drivers/message/fusion
 mptscsih.ko
@@ -37,18 +43,37 @@ mptbase.ko
 scsi_transport_spi.ko
 sr_mod.ko
 scsi_mod.ko
+sd_mod.ko
 
 # kernel/drivers
 cdrom.ko
 loop.ko
+dm-mod.ko
+rtsx_usb.ko
+cec.ko
+mdio_devres.ko
+i2c-smbus.ko
+libphy.ko
+video.ko
+intel-lpss.ko
+intel-lpss.ko
 
 # kernel/fs
 squashfs.ko
 overlay.ko
 isofs.ko
 
-# Others
+# kernel/block
+t10-pi.ko
+
+# kernel/drivers/mmc
+rtsx_usb_sdmmc.ko
 mmc_core.ko
+
+# kernel/lib
+crc-t10dif.ko
+
+# Others
 pcmcia.ko
 pcmcia_core.ko
 ssb.ko
@@ -60,3 +85,7 @@ sl811_cs.ko
 ssb-hcd.ko
 u132-hcd.ko
 ftdi-elan.ko
+i2c-algo-bit.ko
+crct10dif-pclmul.ko
+crct10dif_common.ko
+crct10dif_generic.ko

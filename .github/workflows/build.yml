@@ -13,6 +13,7 @@ jobs:
     -
       name: Install build dependencies
       run: |
+        sudo apt-get update
         sudo apt-get install -y --no-install-recommends wget debootstrap grub-pc-bin \
           grub-efi-amd64-bin mtools squashfs-tools xorriso ca-certificates curl \
           libusb-1.0-0-dev gcc make gzip xz-utils unzip libc6-dev

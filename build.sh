@@ -67,7 +67,7 @@ done
 } > /dev/null 2>&1
 rm -rf work/
 
-set -e -u -v -x
+set -e -u -v
 
 start_time="$(date -u +%s)"
 
@@ -98,15 +98,15 @@ apt-get install -y --no-install-recommends linux-image-$KERNEL_ARCH live-boot \
 apt purge apt -y --allow-remove-essential
 !
 sed -i 's/COMPRESS=gzip/COMPRESS=xz/' work/chroot/etc/initramfs-tools/initramfs.conf
-chroot work/chroot update-initramfs -u
 
 # # Strip unneeded kernel modules
 modules_to_keep=()
 while IFS="" read -r p || [ -n "$p" ]
 do
   modules_to_keep+=("-not" "-name" "$p") 
-done < modules.order
-find work/chroot/lib/modules/*/kernel/* -type f "${modules_to_keep[@]}" -delete
+done < modules.order.test
+find work/chroot/lib/modules/* -type f "${modules_to_keep[@]}" -delete
+find work/chroot/lib/modules/* -type d -empty -delete
 
 # Compress kernel modules
 find work/chroot/lib/modules/* -type f -name "*.ko" -exec strip --strip-unneeded {} +
@@ -190,9 +190,11 @@ boot
 
 # Change hostname and configure .bashrc
 echo 'yacd' > work/chroot/etc/hostname
-echo "export VERSION='$VERSION'" > work/chroot/root/.bashrc
-echo '/usr/local/bin/menu' >> work/chroot/root/.bashrc
-# echo 'DIALOGRC=/root/.dialogrc' >> work/chroot/root/.bashrc
+cat << ! > work/chroot/root/.bashrc
+export VERSION='$VERSION'
+export DIALOGRC=/root/.dialogrc
+/usr/local/bin/menu
+!
 
 # Build the ISO
 umount work/chroot/proc
@@ -213,6 +215,4 @@ grub-mkrescue -o "out/yacd-$VERSION-$ARCH.iso" work/iso \
 end_time="$(date -u +%s)"
 elapsed_time="$((end_time - start_time))"
 
-# Stop echoing commands
-set +x
 echo "Built yacd-$VERSION-$ARCH in $((elapsed_time / 60)) minutes and $((elapsed_time % 60)) seconds."

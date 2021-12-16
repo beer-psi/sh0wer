@@ -19,6 +19,8 @@ If you don't know what type of CPU you have, open File Explorer, right click Thi
 3. Open ROSA Image Writer and write the downloaded ISO to your USB
 4. Reboot, enter your BIOS menu (you'll have to google for this) and select to boot from the USB.
 
+After you're done using yacd, if you want to wipe your USB so you can use it normally, just use the "Clear" button inside ROSA.
+
 # Building yacd
 ## Installing build dependencies
 ### Debian and its derivatives

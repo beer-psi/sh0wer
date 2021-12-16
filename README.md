@@ -2,6 +2,8 @@ Another Linux-based distribution for jailbreaking iOS devices on the A7-A11 chip
 
 It aims to be fast and lightweight, yet easy to use.
 
+![Sample image](https://user-images.githubusercontent.com/92439990/146394241-cd4e7ba5-db91-43f5-a826-1f5ab7c9a939.png)
+
 -------
 # Usage
 Download the appropriate ISO for your PC:
@@ -33,7 +35,8 @@ VERSION="YOUR_VERSION"
 ARCH="ARCHITECTURE_TO_BUILD" # Available architectures: x86_64 and x86
 ```
 
-These variables can be edited inside `build.sh`, however they are not needed:
+These variables set the download link for various resources.  
+They can be edited inside `build.sh`, however they are not needed:
 ```bash
 # Leave empty to automatically grab the latest version
 CHECKRA1N_AMD64=""
@@ -44,10 +47,10 @@ SILEO=""
 ## Advanced: Kernel modules
 Inside the file `modules` is a list of kernel modules to keep. If you made a copy of the `modules` file, you can instruct the build script to read from the file you modified by editing the `KERNEL_MODULES` variable at the start of the script.
 
-The file supports commenting by putting `#` at the beginning of the line (you cannot do in-line commenting). 
-
-Any blank lines must be totally blank (can be removed entirely with `sed '/^$/d'`)
-
+### Notes
+- The file supports commenting by putting `#` at the beginning of the line (you cannot do in-line commenting). 
+- Any blank lines must be totally blank (can be removed entirely with `sed '/^$/d'`)
+- If you're on Windows, ensure that you are using the `LF` newline character so as not to cause any issues.
 
 
 

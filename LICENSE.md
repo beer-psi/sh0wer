@@ -1,3 +1,5 @@
+### Licensing for yacd, with exception to third party software as mentioned below
+
 BSD Zero Clause License
 
 Copyright (c) 2021 beerpsi
@@ -14,6 +16,7 @@ OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR
 PERFORMANCE OF THIS SOFTWARE.
 
 ------
+### Licensing for the portion taken from PongoOS (assets/PongoConsolidated.bin)
 
 The MIT License (MIT)
 

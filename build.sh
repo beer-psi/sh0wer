@@ -111,9 +111,9 @@ sed -i 's/COMPRESS=gzip/COMPRESS=xz/' work/chroot/etc/initramfs-tools/initramfs.
 #find work/chroot/lib/modules/* -type d -empty -delete
 
 # Compress kernel modules
-find work/chroot/lib/modules/* -type f -name "*.ko" -exec strip --strip-unneeded {} +
-find work/chroot/lib/modules/* -type f -name "*.ko" -exec xz --x86 -e9T0 {} +
-depmod -b work/chroot "$(basename "$(find work/chroot/lib/modules/* -maxdepth 0)")"
+#find work/chroot/lib/modules/* -type f -name "*.ko" -exec strip --strip-unneeded {} +
+#find work/chroot/lib/modules/* -type f -name "*.ko" -exec xz --x86 -e9T0 {} +
+#depmod -b work/chroot "$(basename "$(find work/chroot/lib/modules/* -maxdepth 0)")"
 
 # Do I have to rebuild the initramfs?
 chroot work/chroot update-initramfs -u

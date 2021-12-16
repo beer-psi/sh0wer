@@ -1,8 +1,21 @@
 Another Linux-based distribution for jailbreaking iOS devices on the A7-A11 chipset with the checkra1n jailbreak.
 
-It aims to be fast, easy to use, yet lightweight. 
+It aims to be fast and lightweight, yet easy to use.
 
 -------
+# Usage
+Download the appropriate ISO for your PC:
+- `x86_64` is for 64-bit CPUs
+- `x86` is for 32-bit CPUs
+
+If you don't know what type of CPU you have, open File Explorer, right click This PC and select Properties, look for the line "System type":
+- `x64-based processor` means your CPU is 64-bit
+- `x86-based processor` means your CPU is 32-bit
+
+1. Get the latest "Release" ISO from the [Releases tab](https://github.com/extradummythicc/yacd/releases)
+2. Get the ROSA Image Writer [here](http://wiki.rosalab.ru/en/images/6/62/RosaImageWriter-2.6.2-win.zip). If another USB flashing tool (like balenaEtcher) floats your boat, you can use it instead.
+3. Open ROSA Image Writer and write the downloaded ISO to your USB
+4. Reboot, enter your BIOS menu (you'll have to google for this) and select to boot from the USB.
 
 # Building yacd
 ## Installing build dependencies

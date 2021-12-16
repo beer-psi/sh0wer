@@ -96,8 +96,12 @@ apt-get install -y --no-install-recommends linux-image-$KERNEL_ARCH live-boot \
     systemd systemd-sysv usbmuxd libusbmuxd-tools openssh-client sshpass xz-utils dialog
 
 # Remove unnecessary "essential" packages
-dpkg -P --force-all apt e2fsprogs cpio debconf libdebconfclient0 perl-base \
-    passwd adduser dpkg 
+dpkg -P --force-all apt e2fsprogs 
+dpkg -P --force-all cpio 
+dpkg -P --force-all initramfs-tools initramfs-tools-core 
+dpkg -P --force-all debconf libdebconfclient0
+dpkg -P --force-all init-system-helpers
+dpkg -P --force-all dpkg perl-base
 !
 sed -i 's/COMPRESS=gzip/COMPRESS=xz/' work/chroot/etc/initramfs-tools/initramfs.conf
 

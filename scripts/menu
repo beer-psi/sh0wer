@@ -35,13 +35,13 @@ while true; do
         clear
         yacd_logo
         sleep 2
-        /sbin/halt -d 0
+        /usr/sbin/halt -p
         ;;
     6) 
         clear
         yacd_logo
         sleep 2
-        /sbin/reboot -d 0
+        /usr/sbin/halt --reboot
         ;;
     esac
 done

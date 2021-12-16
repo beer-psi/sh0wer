@@ -17,6 +17,7 @@ oxu210hp-hcd.ko
 r8a66597-hcd.ko
 sl811-hcd.ko
 sl811_cs.ko
+squashfs.ko
 ssb-hcd.ko
 u132-hcd.ko
 uhci-hcd.ko

@@ -55,8 +55,6 @@ mdio_devres.ko
 i2c-smbus.ko
 libphy.ko
 video.ko
-intel-lpss.ko
-intel-lpss.ko
 
 # kernel/fs
 squashfs.ko

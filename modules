@@ -71,8 +71,13 @@ mmc_core.ko
 # kernel/lib
 crc-t10dif.ko
 zstd_compress.ko
+zstd_decompress.ko
 
 # Others
+crypto.ko
+crypto_acompress.ko
+button.ko
+xxhash.ko
 zstd.ko
 pcmcia.ko
 pcmcia_core.ko

@@ -103,6 +103,7 @@ tar xf zstd*.tar.gz -C /opt
     make install
 )
 rm -rf zstd*.tar.gz /opt/zstd*
+ln -s /usr/local/bin/zstd /usr/bin/zstd
 !
 sed -i 's/COMPRESS=gzip/COMPRESS=zstd/' work/chroot/etc/initramfs-tools/initramfs.conf
 
@@ -135,7 +136,7 @@ done
 cat << ! | chroot work/chroot /usr/bin/env PATH=/usr/bin:/bin:/usr/sbin:/sbin /bin/bash
 export DEBIAN_FRONTEND=noninteractive
 
-apt-get -y purge curl ca-certificates build-essential
+apt-get -y purge make dpkg-dev g++ gcc libc-dev make build-essential curl ca-certificates perl-modules-5.32 perl libdpkg-perl
 apt-get -y autoremove
 dpkg -P --force-all apt cpio gzip libgpm2
 dpkg -P --force-all initramfs-tools initramfs-tools-core 

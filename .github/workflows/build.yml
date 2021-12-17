@@ -16,7 +16,16 @@ jobs:
         sudo apt-get update
         sudo apt-get install -y --no-install-recommends wget debootstrap grub-pc-bin \
           grub-efi-amd64-bin mtools squashfs-tools xorriso ca-certificates curl \
-          libusb-1.0-0-dev gcc make gzip zstd unzip libc6-dev
+          libusb-1.0-0-dev gcc make gzip unzip libc6-dev
+
+        # gotta get 1.5.0
+        (
+          curl -LO https://github.com/facebook/zstd/releases/download/v1.5.0/zstd-1.5.0.tar.gz
+          sudo tar xf zstd-1.5.0.tar.gz -C /opt
+          cd /opt/zstd*
+          sudo make -j2
+          sudo make install
+        )
     - 
       name: Build for x86_64
       env:

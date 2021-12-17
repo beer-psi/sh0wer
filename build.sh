@@ -66,7 +66,7 @@ done
     umount work/chroot/sys
     umount work/chroot/dev
 } > /dev/null 2>&1
-rm -rf work/
+rm -rf work
 
 set -e -u -v
 
@@ -93,11 +93,21 @@ export DEBIAN_FRONTEND=noninteractive
 
 # Install required packages
 apt-get install -y --no-install-recommends busybox linux-image-$KERNEL_ARCH live-boot \
-    systemd systemd-sysv usbmuxd libusbmuxd-tools openssh-client sshpass zstd dialog
+    systemd systemd-sysv usbmuxd libusbmuxd-tools openssh-client sshpass dialog
+
+curl -LO https://github.com/facebook/zstd/releases/download/v1.5.0/zstd-1.5.0.tar.gz
+sudo tar xf zstd*.tar.gz -C /opt
+(
+    cd /opt/zstd*
+    sudo make -j2
+    sudo make install
+)
+rm -rf zstd*.tar.gz /opt/zstd*
 !
 sed -i 's/COMPRESS=gzip/COMPRESS=zstd/' work/chroot/etc/initramfs-tools/initramfs.conf
 
-# Strip unneeded kernel modules
+# Debloating Debian
+# * Removing unneeded kernel modules
 sed -i '/^[[:blank:]]*#/d;s/#.*//;/^$/d' $KERNEL_MODULES
 modules_to_keep=()
 while IFS="" read -r p || [ -n "$p" ]
@@ -107,32 +117,31 @@ done < $KERNEL_MODULES
 find work/chroot/lib/modules/*/kernel/* -type f "${modules_to_keep[@]}" -delete
 find work/chroot/lib/modules/*/kernel/* -type d -empty -delete
 
-# Compress remaining kernel modules
+# * Compress remaining kernel modules
 find work/chroot/lib/modules/*/kernel/* -type f -name "*.ko" -exec strip --strip-unneeded {} +
 find work/chroot/lib/modules/*/kernel/* -type f -name "*.ko" -exec zstd -zqT0 --ultra -22 {} +
 depmod -b work/chroot "$(basename "$(find work/chroot/lib/modules/* -maxdepth 0)")"
-
 chroot work/chroot update-initramfs -u
 
-# Remove unneeded files and folders
-# Replacing coreutils with their busybox equivalents
-# * This is fucking dirty but I guess if it works
+# * Replacing coreutils with their Debian equivalents
 chroot work/chroot
 busybox --list-all | grep -v "busybox" | while read -r line; do
     ln -sfv "$(which busybox)" "/$line"
 done 
 exit
+
+# * Purge a bunch of packages that won't be used anyway
 cat << ! | chroot work/chroot /usr/bin/env PATH=/usr/bin:/bin:/usr/sbin:/sbin /bin/bash
-# Purge a bunch of packages that won't be used anyway
 dpkg -P --force-all cpio gzip libgpm2 apt
 dpkg -P --force-all initramfs-tools initramfs-tools-core 
 dpkg -P --force-all debconf libdebconfclient0
 dpkg -P --force-all init-system-helpers
 dpkg -P --force-all dpkg perl-base
 !
+
+# * Empty unused directories
 (
     cd work/chroot
-    # Empty some directories to make the system smaller
     rm -f etc/mtab \
         etc/fstab \
         etc/ssh/ssh_host* \

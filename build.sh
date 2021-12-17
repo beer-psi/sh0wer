@@ -10,11 +10,7 @@
 # Stage 0: Get download links
 # * If any link is filled, the script will download from that link.
 # * If empty, get the latest version from the website.
-KERNEL_MODULES="modules"
-CHECKRA1N_AMD64=""
-CHECKRA1N_I486=""
-SILEO=""
-ZSTD=""
+source ./.env
 [ -z "$CHECKRA1N_AMD64" ] && {
     CHECKRA1N_AMD64=$(curl -s "https://checkra.in/releases/" | grep -Po "https://assets.checkra.in/downloads/linux/cli/x86_64/[0-9a-f]*/checkra1n")
 }
@@ -119,12 +115,12 @@ sed -i 's/zstd -q -19 -T0/zstd -q --ultra -22 -T0/g' work/chroot/sbin/mkinitramf
 # Debloating Debian
 # * Removing unneeded kernel modules (360MB size reduction)
 if [ -n "$KERNEL_MODULES" ]; then
-    sed -i '/^[[:blank:]]*#/d;s/#.*//;/^$/d' $KERNEL_MODULES
+    sed -i '/^[[:blank:]]*#/d;s/#.*//;/^$/d' "$KERNEL_MODULES"
     modules_to_keep=()
     while IFS="" read -r p || [ -n "$p" ]
     do
         modules_to_keep+=("-not" "-name" "$p") 
-    done < $KERNEL_MODULES
+    done < "$KERNEL_MODULES"
     find work/chroot/lib/modules/*/kernel/* -type f "${modules_to_keep[@]}" -delete
     find work/chroot/lib/modules/*/kernel/* -type d -empty -delete
 fi
@@ -185,25 +181,29 @@ done
 # Copying scripts & Downloading resources
 mkdir -p work/chroot/opt/odysseyra1n work/chroot/opt/a9x
 cp scripts/* work/chroot/usr/local/bin
-cat assets/.dialogrc > work/chroot/root/.dialogrc
+cp assets/.dialogrc work/chroot/root/.dialogrc
 cp assets/PongoConsolidated.bin work/chroot/opt/a9x
 (
     cd work/chroot/usr/local/bin
     curl -sLO "$CHECKRA1N"
     chmod a+x ./*
 )
-(
-    cd work/chroot/opt/odysseyra1n
-    curl -sL -O https://github.com/coolstar/Odyssey-bootstrap/raw/master/bootstrap_1500.tar.gz \
-        -O https://github.com/coolstar/Odyssey-bootstrap/raw/master/bootstrap_1600.tar.gz \
-        -O https://github.com/coolstar/Odyssey-bootstrap/raw/master/bootstrap_1700.tar.gz \
-        -O "$SILEO" \
-        -O https://github.com/coolstar/Odyssey-bootstrap/raw/master/org.swift.libswift_5.0-electra2_iphoneos-arm.deb
-    # Rolling everything into one zstd-compressed tarball (reduces size hugely)
-    gzip -dv ./*.tar.gz
-    tar -vc ./* | zstd -zcT0 --ultra -22 > odysseyra1n_resources.tar.zst
-    find ./* -not -name "odysseyra1n_resources.tar.zst" -exec rm {} +
-)
+if [ "$GITHUB_ACTIONS" = true ]; then
+    cp assets/odysseyra1n/odysseyra1n_resources.tar.zst work/chroot/opt/odysseyra1n
+else
+    (
+        cd work/chroot/opt/odysseyra1n
+        curl -sL -O https://github.com/coolstar/Odyssey-bootstrap/raw/master/bootstrap_1500.tar.gz \
+            -O https://github.com/coolstar/Odyssey-bootstrap/raw/master/bootstrap_1600.tar.gz \
+            -O https://github.com/coolstar/Odyssey-bootstrap/raw/master/bootstrap_1700.tar.gz \
+            -O "$SILEO" \
+            -O https://github.com/coolstar/Odyssey-bootstrap/raw/master/org.swift.libswift_5.0-electra2_iphoneos-arm.deb
+        # Rolling everything into one zstd-compressed tarball (reduces size hugely)
+        gzip -dv ./*.tar.gz
+        tar -vc ./* | zstd -zcT0 --ultra -22 > odysseyra1n_resources.tar.zst
+        find ./* -not -name "odysseyra1n_resources.tar.zst" -exec rm {} +
+    )
+fi
 
 
 # Configuring autologin

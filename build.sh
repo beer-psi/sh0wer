@@ -121,7 +121,7 @@ while IFS="" read -r p || [ -n "$p" ]; do
         ln -s /usr/bin/busybox /usr/bin/$p
         continue 
     fi
-    ln -sf /usr/bin/busybox $(which "$p") 
+    ln -sf /usr/bin/busybox $(which "$p")
 done < busybox-programs
 rm busybox-programs
 

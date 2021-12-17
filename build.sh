@@ -10,7 +10,7 @@
 # Stage 0: Get download links
 # * If any link is filled, the script will download from that link.
 # * If empty, get the latest version from the website.
-KERNEL_MODULES="modules"
+KERNEL_MODULES=""
 CHECKRA1N_AMD64=""
 CHECKRA1N_I486=""
 SILEO=""
@@ -118,15 +118,16 @@ sed -i 's/zstd -q -19 -T0/zstd -q --ultra -22 -T0/g' work/chroot/sbin/mkinitramf
 
 # Debloating Debian
 # * Removing unneeded kernel modules (360MB size reduction)
-sed -i '/^[[:blank:]]*#/d;s/#.*//;/^$/d' $KERNEL_MODULES
-modules_to_keep=()
-while IFS="" read -r p || [ -n "$p" ]
-do
-    modules_to_keep+=("-not" "-name" "$p") 
-done < $KERNEL_MODULES
-find work/chroot/lib/modules/*/kernel/* -type f "${modules_to_keep[@]}" -delete
-find work/chroot/lib/modules/*/kernel/* -type d -empty -delete
-
+if [ -n "$KERNEL_MODULES" ]; then
+    sed -i '/^[[:blank:]]*#/d;s/#.*//;/^$/d' $KERNEL_MODULES
+    modules_to_keep=()
+    while IFS="" read -r p || [ -n "$p" ]
+    do
+        modules_to_keep+=("-not" "-name" "$p") 
+    done < $KERNEL_MODULES
+    find work/chroot/lib/modules/*/kernel/* -type f "${modules_to_keep[@]}" -delete
+    find work/chroot/lib/modules/*/kernel/* -type d -empty -delete
+fi
 # * Compress remaining kernel modules (like 3MB size reduction)
 find work/chroot/lib/modules/*/kernel/* -type f -name "*.ko" -exec strip --strip-unneeded {} +
 find work/chroot/lib/modules/*/kernel/* -type f -name "*.ko" -exec zstd --long -zqT0 --ultra -22 {} +

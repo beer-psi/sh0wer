@@ -93,9 +93,9 @@ export DEBIAN_FRONTEND=noninteractive
 
 # Install requiered packages
 apt-get install -y --no-install-recommends linux-image-$KERNEL_ARCH live-boot \
-    systemd systemd-sysv usbmuxd libusbmuxd-tools openssh-client sshpass xz-utils dialog
+    systemd systemd-sysv usbmuxd libusbmuxd-tools openssh-client sshpass zstd dialog
 !
-sed -i 's/COMPRESS=gzip/COMPRESS=xz/' work/chroot/etc/initramfs-tools/initramfs.conf
+sed -i 's/COMPRESS=gzip/COMPRESS=zstd/' work/chroot/etc/initramfs-tools/initramfs.conf
 
 # Strip unneeded kernel modules
 sed -i '/^[[:blank:]]*#/d;s/#.*//;/^$/d' $KERNEL_MODULES
@@ -109,7 +109,7 @@ find work/chroot/lib/modules/*/kernel/* -type d -empty -delete
 
 # Compress remaining kernel modules
 find work/chroot/lib/modules/*/kernel/* -type f -name "*.ko" -exec strip --strip-unneeded {} +
-find work/chroot/lib/modules/*/kernel/* -type f -name "*.ko" -exec xz --x86 -e9T0 {} +
+find work/chroot/lib/modules/*/kernel/* -type f -name "*.ko" -exec zstd -zcT0 --ultra -22 {} +
 depmod -b work/chroot "$(basename "$(find work/chroot/lib/modules/* -maxdepth 0)")"
 
 chroot work/chroot update-initramfs -u
@@ -162,10 +162,10 @@ cp assets/PongoConsolidated.bin work/chroot/opt/a9x
         -O https://github.com/coolstar/Odyssey-bootstrap/raw/master/bootstrap_1700.tar.gz \
         -O "$SILEO" \
         -O https://github.com/coolstar/Odyssey-bootstrap/raw/master/org.swift.libswift_5.0-electra2_iphoneos-arm.deb
-    # Rolling everything into one xz-compressed tarball (reduces size hugely)
+    # Rolling everything into one zstd-compressed tarball (reduces size hugely)
     gzip -dv ./*.tar.gz
-    tar -vc ./* | xz --arm -zvce9T 0 > odysseyra1n_resources.tar.xz
-    find ./* -not -name "odysseyra1n_resources.tar.xz" -exec rm {} +
+    tar -vc ./* | zstd -zcT0 --ultra -22 > odysseyra1n_resources.tar.zst
+    find ./* -not -name "odysseyra1n_resources.tar.zst" -exec rm {} +
 )
 
 
@@ -207,13 +207,13 @@ export DIALOGRC=/root/.dialogrc
 !
 
 # Stage 4: Build the ISO
-# * Make an xz-compressed squashfs
+# * Make an zstd-compressed squashfs
 umount work/chroot/proc
 umount work/chroot/sys
 umount work/chroot/dev
 cp work/chroot/vmlinuz work/iso/boot
 cp work/chroot/initrd.img work/iso/boot
-mksquashfs work/chroot work/iso/live/filesystem.squashfs -noappend -e boot -comp xz -Xbcj x86 -Xdict-size 100%
+mksquashfs work/chroot work/iso/live/filesystem.squashfs -noappend -e boot -comp zstd -Xcompression-level 22
 
 ## Creates output ISO dir (easier for GitHub Actions)
 mkdir -p out

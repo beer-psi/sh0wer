@@ -40,6 +40,7 @@ jobs:
   upload-prerelease:
     needs: build
     runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master' # Only upload prereleases when it gets merged to main
     steps:
       - 
         name: Checkout

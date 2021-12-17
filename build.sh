@@ -92,8 +92,8 @@ cat << ! | chroot work/chroot /usr/bin/env PATH=/usr/bin:/bin:/usr/sbin:/sbin /b
 export DEBIAN_FRONTEND=noninteractive
 
 # Install required packages
-apt-get install -y --no-install-recommends busybox linux-image-$KERNEL_ARCH curl ca-certificates live-boot \
-    systemd systemd-sysv usbmuxd libusbmuxd-tools openssh-client sshpass dialog build-essential
+apt-get install -y --no-install-recommends busybox linux-image-$KERNEL_ARCH live-boot \
+    systemd systemd-sysv usbmuxd libusbmuxd-tools openssh-client sshpass dialog build-essential curl ca-certificates
 
 curl -LO https://github.com/facebook/zstd/releases/download/v1.5.0/zstd-1.5.0.tar.gz
 tar xf zstd*.tar.gz -C /opt
@@ -133,8 +133,10 @@ done
 
 # * Purge a bunch of packages that won't be used anyway
 cat << ! | chroot work/chroot /usr/bin/env PATH=/usr/bin:/bin:/usr/sbin:/sbin /bin/bash
-apt purge curl ca-certificates build-essential
-apt autoremove
+export DEBIAN_FRONTEND=noninteractive
+
+apt-get purge curl ca-certificates build-essential
+apt-get autoremove
 dpkg -P --force-all apt cpio gzip libgpm2
 dpkg -P --force-all initramfs-tools initramfs-tools-core 
 dpkg -P --force-all debconf libdebconfclient0

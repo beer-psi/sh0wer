@@ -143,17 +143,17 @@ dpkg -P --force-all init-system-helpers
 dpkg -P --force-all dpkg perl-base
 !
 
-# * Replacing coreutils with their Debian equivalents (123MB size reduction)
-cat << "!" | chroot work/chroot /bin/bash
-ln -sfv "$(command -v busybox)" /usr/bin/which
-busybox --list | egrep -v "(busybox)|(init)" | while read -r line; do
-    if which $line &> /dev/null; then                               # If command exists
-        if [ "$(stat -c%s $(which $line))" -gt 16 ]; then           # And we can gain storage space from making a symlink (symlinks are 16 bytes)
-            ln -sfv "$(which busybox)" "$(which $line)"             # Then make one (ignore nonexistent commands /shrug)
-        fi
-    fi
-done 
-!
+# # * Replacing coreutils with their Debian equivalents (123MB size reduction)
+# cat << "!" | chroot work/chroot /bin/bash
+# ln -sfv "$(command -v busybox)" /usr/bin/which
+# busybox --list | egrep -v "(busybox)|(init)" | while read -r line; do
+#     if which $line &> /dev/null; then                               # If command exists
+#         if [ "$(stat -c%s $(which $line))" -gt 16 ]; then           # And we can gain storage space from making a symlink (symlinks are 16 bytes)
+#             ln -sfv "$(which busybox)" "$(which $line)"             # Then make one (ignore nonexistent commands /shrug)
+#         fi
+#     fi
+# done 
+# !
 
 # * Empty unused directories
 (
@@ -249,7 +249,7 @@ umount work/chroot/sys
 umount work/chroot/dev
 cp work/chroot/vmlinuz work/iso/boot
 cp work/chroot/initrd.img work/iso/boot
-mksquashfs work/chroot work/iso/live/filesystem.squashfs -noappend -e boot -comp xz -Xbcj 100% -Xdict-size 100%
+mksquashfs work/chroot work/iso/live/filesystem.squashfs -noappend -e boot -comp zstd -Xcompression-level 22
 
 ## Creates output ISO dir (easier for GitHub Actions)
 mkdir -p out

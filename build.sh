@@ -124,11 +124,11 @@ depmod -b work/chroot "$(basename "$(find work/chroot/lib/modules/* -maxdepth 0)
 chroot work/chroot update-initramfs -u
 
 # * Replacing coreutils with their Debian equivalents
-chroot work/chroot
-busybox --list-all | grep -v "busybox" | while read -r line; do
+cat << "!" | chroot work/chroot /bin/bash
+busybox --list-all | grep -v "busybox" | while read -r line; do 
     ln -sfv "$(which busybox)" "/$line"
 done 
-exit
+!
 
 # * Purge a bunch of packages that won't be used anyway
 cat << ! | chroot work/chroot /usr/bin/env PATH=/usr/bin:/bin:/usr/sbin:/sbin /bin/bash

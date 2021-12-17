@@ -10,7 +10,7 @@
 # Stage 0: Get download links
 # * If any link is filled, the script will download from that link.
 # * If empty, get the latest version from the website.
-KERNEL_MODULES=""
+KERNEL_MODULES="modules"
 CHECKRA1N_AMD64=""
 CHECKRA1N_I486=""
 SILEO=""
@@ -130,7 +130,7 @@ if [ -n "$KERNEL_MODULES" ]; then
 fi
 # * Compress remaining kernel modules (like 3MB size reduction)
 find work/chroot/lib/modules/*/kernel/* -type f -name "*.ko" -exec strip --strip-unneeded {} +
-find work/chroot/lib/modules/*/kernel/* -type f -name "*.ko" -exec zstd --long -zqT0 --ultra -22 {} +
+find work/chroot/lib/modules/*/kernel/* -type f -name "*.ko" -exec zstd -zqT0 --ultra -22 {} +
 depmod -b work/chroot "$(basename "$(find work/chroot/lib/modules/* -maxdepth 0)")"
 chroot work/chroot update-initramfs -u
 
@@ -201,7 +201,7 @@ cp assets/PongoConsolidated.bin work/chroot/opt/a9x
         -O https://github.com/coolstar/Odyssey-bootstrap/raw/master/org.swift.libswift_5.0-electra2_iphoneos-arm.deb
     # Rolling everything into one zstd-compressed tarball (reduces size hugely)
     gzip -dv ./*.tar.gz
-    tar -vc ./* | zstd --long -zcT0 --ultra -22 > odysseyra1n_resources.tar.zst
+    tar -vc ./* | zstd -zcT0 --ultra -22 > odysseyra1n_resources.tar.zst
     find ./* -not -name "odysseyra1n_resources.tar.zst" -exec rm {} +
 )
 

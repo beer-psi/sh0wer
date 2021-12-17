@@ -112,21 +112,17 @@ find work/chroot/lib/modules/*/kernel/* -type f -name "*.ko" -exec strip --strip
 find work/chroot/lib/modules/*/kernel/* -type f -name "*.ko" -exec zstd -zqT0 --ultra -22 {} +
 depmod -b work/chroot "$(basename "$(find work/chroot/lib/modules/* -maxdepth 0)")"
 
+chroot work/chroot update-initramfs -u
+
 # Remove unneeded files and folders
+# Replacing coreutils with their busybox equivalents
+# * This is fucking dirty but I guess if it works
+chroot work/chroot
+busybox --list-all | while read -r line; do
+    ln -sfv "$(which busybox)" "/$line"
+done 
+exit
 cat << ! | chroot work/chroot /usr/bin/env PATH=/usr/bin:/bin:/usr/sbin:/sbin /bin/bash
-# Replace coreutils with their busybox equivalents
-busybox --list > busybox-programs
-while IFS="" read -r p || [ -n "$p" ]; do
-    if [ -z $(which "$p") ]; then   
-        ln -sv /usr/bin/busybox /usr/bin/$p
-        continue 
-    fi
-    ln -sfv /usr/bin/busybox $(which "$p")
-done < busybox-programs
-rm busybox-programs
-
-update-initramfs -u
-
 # Purge a bunch of packages that won't be used anyway
 dpkg -P --force-all cpio gzip libgpm2 apt
 dpkg -P --force-all initramfs-tools initramfs-tools-core 

@@ -132,8 +132,9 @@ done
 
 # * Purge a bunch of packages that won't be used anyway
 cat << ! | chroot work/chroot /usr/bin/env PATH=/usr/bin:/bin:/usr/sbin:/sbin /bin/bash
-dpkg -P --force-all cpio gzip libgpm2 apt curl ca-certificates build-essential
+dpkg -P --force-all cpio gzip libgpm2 curl ca-certificates build-essential
 dpkg -P --force-all initramfs-tools initramfs-tools-core 
+apt autoremove
 dpkg -P --force-all debconf libdebconfclient0
 dpkg -P --force-all init-system-helpers
 dpkg -P --force-all dpkg perl-base

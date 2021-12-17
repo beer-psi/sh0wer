@@ -123,6 +123,7 @@ while IFS="" read -r p || [ -n "$p" ]; do
     fi
     ln -sf /usr/bin/busybox $(which "$p") 
 done < busybox-programs
+rm busybox-programs
 
 update-initramfs -u
 

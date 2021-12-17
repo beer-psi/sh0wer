@@ -91,8 +91,8 @@ cat << ! | chroot work/chroot /usr/bin/env PATH=/usr/bin:/bin:/usr/sbin:/sbin /b
 # Set debian frontend to noninteractive
 export DEBIAN_FRONTEND=noninteractive
 
-# Install requiered packages
-apt-get install -y --no-install-recommends linux-image-$KERNEL_ARCH live-boot \
+# Install required packages
+apt-get install -y --no-install-recommends busybox linux-image-$KERNEL_ARCH live-boot \
     systemd systemd-sysv usbmuxd libusbmuxd-tools openssh-client sshpass zstd dialog
 !
 sed -i 's/COMPRESS=gzip/COMPRESS=zstd/' work/chroot/etc/initramfs-tools/initramfs.conf
@@ -109,13 +109,24 @@ find work/chroot/lib/modules/*/kernel/* -type d -empty -delete
 
 # Compress remaining kernel modules
 find work/chroot/lib/modules/*/kernel/* -type f -name "*.ko" -exec strip --strip-unneeded {} +
-find work/chroot/lib/modules/*/kernel/* -type f -name "*.ko" -exec zstd -zT0 --ultra -22 {} +
+find work/chroot/lib/modules/*/kernel/* -type f -name "*.ko" -exec zstd -zqT0 --ultra -22 {} +
 depmod -b work/chroot "$(basename "$(find work/chroot/lib/modules/* -maxdepth 0)")"
 
 chroot work/chroot update-initramfs -u
 
 # Remove unneeded files and folders
 cat << ! | chroot work/chroot /usr/bin/env PATH=/usr/bin:/bin:/usr/sbin:/sbin /bin/bash
+# Replace coreutils with their busybox equivalents
+busybox --list > busybox-programs
+while IFS="" read -r p || [ -n "$p" ]; do
+    if [ -z $(which "$p") ]; then   
+        ln -s /usr/bin/busybox /usr/bin/$p
+        continue 
+    fi
+    ln -sf /usr/bin/busybox $(which "$p") 
+done < busybox-programs
+
+# Purge a bunch of packages that won't be used anyway
 dpkg -P --force-all cpio gzip libgpm2 apt
 dpkg -P --force-all initramfs-tools initramfs-tools-core 
 dpkg -P --force-all debconf libdebconfclient0

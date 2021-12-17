@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/dash
 . /usr/local/bin/common
 
 height="$(($(tput lines) - 6))"

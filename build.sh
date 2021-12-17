@@ -92,15 +92,15 @@ cat << ! | chroot work/chroot /usr/bin/env PATH=/usr/bin:/bin:/usr/sbin:/sbin /b
 export DEBIAN_FRONTEND=noninteractive
 
 # Install required packages
-apt-get install -y --no-install-recommends busybox linux-image-$KERNEL_ARCH live-boot \
+apt-get install -y --no-install-recommends busybox linux-image-$KERNEL_ARCH curl live-boot \
     systemd systemd-sysv usbmuxd libusbmuxd-tools openssh-client sshpass dialog
 
 curl -LO https://github.com/facebook/zstd/releases/download/v1.5.0/zstd-1.5.0.tar.gz
 sudo tar xf zstd*.tar.gz -C /opt
 (
     cd /opt/zstd*
-    sudo make -j2
-    sudo make install
+    make -j2
+    make install
 )
 rm -rf zstd*.tar.gz /opt/zstd*
 !
@@ -132,7 +132,7 @@ exit
 
 # * Purge a bunch of packages that won't be used anyway
 cat << ! | chroot work/chroot /usr/bin/env PATH=/usr/bin:/bin:/usr/sbin:/sbin /bin/bash
-dpkg -P --force-all cpio gzip libgpm2 apt
+dpkg -P --force-all cpio gzip libgpm2 apt curl
 dpkg -P --force-all initramfs-tools initramfs-tools-core 
 dpkg -P --force-all debconf libdebconfclient0
 dpkg -P --force-all init-system-helpers

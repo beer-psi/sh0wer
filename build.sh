@@ -81,7 +81,7 @@ start_time="$(date -u +%s)"
 #   * Stripping unneeded kernel modules
 #   * Remove unneeded files and directories
 mkdir -p work/chroot work/iso/live work/iso/boot/grub
-debootstrap --variant=minbase --arch="$REPO_ARCH" stable work/chroot 'http://deb.debian.org/debian/'
+debootstrap --variant=minbase --arch="$REPO_ARCH" sid work/chroot 'http://deb.debian.org/debian/'
 mount --bind /proc work/chroot/proc
 mount --bind /sys work/chroot/sys
 mount --bind /dev work/chroot/dev
@@ -118,7 +118,7 @@ chroot work/chroot update-initramfs -u
 # Replacing coreutils with their busybox equivalents
 # * This is fucking dirty but I guess if it works
 chroot work/chroot
-busybox --list-all | while read -r line; do
+busybox --list-all | grep -v "busybox" | while read -r line; do
     ln -sfv "$(which busybox)" "/$line"
 done 
 exit

@@ -109,7 +109,7 @@ find work/chroot/lib/modules/*/kernel/* -type d -empty -delete
 
 # Compress remaining kernel modules
 find work/chroot/lib/modules/*/kernel/* -type f -name "*.ko" -exec strip --strip-unneeded {} +
-find work/chroot/lib/modules/*/kernel/* -type f -name "*.ko" -exec zstd -zcT0 --ultra -22 {} +
+find work/chroot/lib/modules/*/kernel/* -type f -name "*.ko" -exec zstd -zT0 --ultra -22 {} +
 depmod -b work/chroot "$(basename "$(find work/chroot/lib/modules/* -maxdepth 0)")"
 
 chroot work/chroot update-initramfs -u

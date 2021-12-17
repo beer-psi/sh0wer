@@ -150,7 +150,7 @@ dpkg -P --force-all dpkg perl-base
 # * Replacing coreutils with their Debian equivalents (123MB size reduction)
 cat << "!" | chroot work/chroot /bin/bash
 ln -sfv "$(command -v busybox)" /usr/bin/which
-busybox --list | grep -v "busybox" | while read -r line; do
+busybox --list | grep -v "(busybox)|(init)" | while read -r line; do
     if which $line &> /dev/null; then                               # If command exists
         if [ "$(stat -c%s $(which $line))" -gt 16 ]; then           # And we can gain storage space from making a symlink (symlinks are 16 bytes)
             ln -sfv "$(which busybox)" "$(which $line)"             # Then make one (ignore nonexistent commands /shrug)

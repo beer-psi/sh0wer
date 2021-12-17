@@ -133,18 +133,6 @@ find work/chroot/lib/modules/*/kernel/* -type f -name "*.ko" -exec zstd --long -
 depmod -b work/chroot "$(basename "$(find work/chroot/lib/modules/* -maxdepth 0)")"
 chroot work/chroot update-initramfs -u
 
-# * Replacing coreutils with their Debian equivalents (123MB size reduction)
-cat << "!" | chroot work/chroot /bin/bash
-ln -sfv "$(command -v busybox)" /usr/bin/which
-busybox --list | grep -v "busybox" | while read -r line; do
-    if which $line &> /dev/null; then                               # If command exists
-        if [ "$(stat -c%s $(which $line))" -gt 16 ]; then           # And we can gain storage space from making a symlink (symlinks are 16 bytes)
-            ln -sfv "$(which busybox)" "$(which $line)"             # Then make one (ignore nonexistent commands /shrug)
-        fi
-    fi
-done 
-!
-
 # * Purge a bunch of packages that won't be used anyway
 cat << ! | chroot work/chroot /usr/bin/env PATH=/usr/bin:/bin:/usr/sbin:/sbin /bin/bash
 export DEBIAN_FRONTEND=noninteractive
@@ -156,6 +144,18 @@ dpkg -P --force-all initramfs-tools initramfs-tools-core
 dpkg -P --force-all debconf libdebconfclient0
 dpkg -P --force-all init-system-helpers
 dpkg -P --force-all dpkg perl-base
+!
+
+# * Replacing coreutils with their Debian equivalents (123MB size reduction)
+cat << "!" | chroot work/chroot /bin/bash
+ln -sfv "$(command -v busybox)" /usr/bin/which
+busybox --list | grep -v "busybox" | while read -r line; do
+    if which $line &> /dev/null; then                               # If command exists
+        if [ "$(stat -c%s $(which $line))" -gt 16 ]; then           # And we can gain storage space from making a symlink (symlinks are 16 bytes)
+            ln -sfv "$(which busybox)" "$(which $line)"             # Then make one (ignore nonexistent commands /shrug)
+        fi
+    fi
+done 
 !
 
 # * Empty unused directories

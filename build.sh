@@ -68,7 +68,7 @@ done
 } > /dev/null 2>&1
 rm -rf work
 
-set -e -u -v
+set -e -u -x
 
 start_time="$(date -u +%s)"
 
@@ -94,10 +94,8 @@ export DEBIAN_FRONTEND=noninteractive
 # Install required packages
 apt-get update
 apt-get install -y --no-install-recommends busybox linux-image-$KERNEL_ARCH live-boot \
-    systemd systemd-sysv usbmuxd libusbmuxd-tools openssh-client sshpass dialog 
-
-# This is for building zstd latest (Debian sid is still behind)
-apt-get install -y --no-install-recommends build-essential curl ca-certificates
+    systemd systemd-sysv usbmuxd libusbmuxd-tools openssh-client sshpass dialog \
+    build-essential curl ca-certificates
 
 curl -LO $ZSTD
 tar xf zstd*.tar.gz -C /opt
@@ -107,7 +105,7 @@ tar xf zstd*.tar.gz -C /opt
     make install
 )
 rm -rf zstd*.tar.gz /opt/zstd*
-ln -s /usr/local/bin/zstd /usr/bin/zstd
+ln -sf /usr/local/bin/zstd /usr/bin/zstd
 !
 sed -i 's/COMPRESS=gzip/COMPRESS=zstd/' work/chroot/etc/initramfs-tools/initramfs.conf
 sed -i 's/zstd -q -19 -T0/zstd -q --ultra -22 -T0/g' work/chroot/sbin/mkinitramfs
@@ -115,6 +113,7 @@ sed -i 's/zstd -q -19 -T0/zstd -q --ultra -22 -T0/g' work/chroot/sbin/mkinitramf
 # Debloating Debian
 # * Removing unneeded kernel modules (360MB size reduction)
 if [ -n "$KERNEL_MODULES" ]; then
+    cat work/chroot/etc/initramfs-tools/modules >> "$KERNEL_MODULES"
     sed -i '/^[[:blank:]]*#/d;s/#.*//;/^$/d' "$KERNEL_MODULES"
     modules_to_keep=()
     while IFS="" read -r p || [ -n "$p" ]
@@ -126,7 +125,7 @@ if [ -n "$KERNEL_MODULES" ]; then
 fi
 # * Compress remaining kernel modules (like 3MB size reduction)
 find work/chroot/lib/modules/*/kernel/* -type f -name "*.ko" -exec strip --strip-unneeded {} +
-find work/chroot/lib/modules/*/kernel/* -type f -name "*.ko" -exec zstd -zqT0 --ultra -22 {} +
+find work/chroot/lib/modules/*/kernel/* -type f -name "*.ko" -exec zstd -zqT0 --rm --ultra -22 {} +
 depmod -b work/chroot "$(basename "$(find work/chroot/lib/modules/* -maxdepth 0)")"
 chroot work/chroot update-initramfs -u
 
@@ -143,17 +142,17 @@ dpkg -P --force-all init-system-helpers
 dpkg -P --force-all dpkg perl-base
 !
 
-# # * Replacing coreutils with their Debian equivalents (123MB size reduction)
-# cat << "!" | chroot work/chroot /bin/bash
-# ln -sfv "$(command -v busybox)" /usr/bin/which
-# busybox --list | egrep -v "(busybox)|(init)" | while read -r line; do
-#     if which $line &> /dev/null; then                               # If command exists
-#         if [ "$(stat -c%s $(which $line))" -gt 16 ]; then           # And we can gain storage space from making a symlink (symlinks are 16 bytes)
-#             ln -sfv "$(which busybox)" "$(which $line)"             # Then make one (ignore nonexistent commands /shrug)
-#         fi
-#     fi
-# done 
-# !
+# * Replacing coreutils with their Debian equivalents (123MB size reduction)
+cat << "!" | chroot work/chroot /bin/bash
+ln -sfv "$(command -v busybox)" /usr/bin/which
+busybox --list | egrep -v "(busybox)|(init)" | while read -r line; do
+    if which $line &> /dev/null; then                               # If command exists
+        if [ "$(stat -c%s $(which $line))" -gt 16 ]; then           # And we can gain storage space from making a symlink (symlinks are 16 bytes)
+            ln -sfv "$(which busybox)" "$(which $line)"             # Then make one (ignore nonexistent commands /shrug)
+        fi
+    fi
+done 
+!
 
 # * Empty unused directories
 (
@@ -225,9 +224,9 @@ echo '   (___(__)  '
 echo "    ' ' ' '  "
 echo "   ' ' ' '   "
 echo ''
-echo '   sh0wer    '
+echo '    sh0wer   '
 echo '  by beerpsi '
-linux /boot/vmlinuz boot=live quiet
+linux /boot/vmlinuz boot=live
 initrd /boot/initrd.img
 boot
 !

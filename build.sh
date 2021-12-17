@@ -14,6 +14,7 @@ KERNEL_MODULES="modules"
 CHECKRA1N_AMD64=""
 CHECKRA1N_I486=""
 SILEO=""
+ZSTD=""
 [ -z "$CHECKRA1N_AMD64" ] && {
     CHECKRA1N_AMD64=$(curl -s "https://checkra.in/releases/" | grep -Po "https://assets.checkra.in/downloads/linux/cli/x86_64/[0-9a-f]*/checkra1n")
 }
@@ -22,6 +23,9 @@ SILEO=""
 }
 [ -z "$SILEO" ] && {
     SILEO="https://github.com$(curl -s https://github.com/Sileo/Sileo/releases | grep -Po "/Sileo\/Sileo/releases/download/[\d.]+/org\.coolstar\.sileo_[\d.]+_iphoneos-arm\.deb" | head -1)"
+}
+[ -z "$ZSTD" ] && {
+    ZSTD="https://github.com$(curl -s https://github.com/facebook/zstd/releases | grep -Po "/facebook\/zstd/releases/download/v[\d.]+/zstd-[\d.]+\.tar\.gz" | head -1)"
 }
 
 # Stage 1: User input
@@ -95,11 +99,11 @@ export DEBIAN_FRONTEND=noninteractive
 apt-get install -y --no-install-recommends busybox linux-image-$KERNEL_ARCH live-boot \
     systemd systemd-sysv usbmuxd libusbmuxd-tools openssh-client sshpass dialog build-essential curl ca-certificates
 
-curl -LO https://github.com/facebook/zstd/releases/download/v1.5.0/zstd-1.5.0.tar.gz
+curl -LO $ZSTD
 tar xf zstd*.tar.gz -C /opt
 (
     cd /opt/zstd*
-    make -j2
+    make
     make install
 )
 rm -rf zstd*.tar.gz /opt/zstd*
@@ -120,7 +124,7 @@ find work/chroot/lib/modules/*/kernel/* -type d -empty -delete
 
 # * Compress remaining kernel modules
 find work/chroot/lib/modules/*/kernel/* -type f -name "*.ko" -exec strip --strip-unneeded {} +
-find work/chroot/lib/modules/*/kernel/* -type f -name "*.ko" -exec zstd -zqT0 --ultra -22 {} +
+find work/chroot/lib/modules/*/kernel/* -type f -name "*.ko" -exec zstd --long -zqT0 --ultra -22 {} +
 depmod -b work/chroot "$(basename "$(find work/chroot/lib/modules/* -maxdepth 0)")"
 chroot work/chroot update-initramfs -u
 
@@ -187,7 +191,7 @@ cp assets/PongoConsolidated.bin work/chroot/opt/a9x
         -O https://github.com/coolstar/Odyssey-bootstrap/raw/master/org.swift.libswift_5.0-electra2_iphoneos-arm.deb
     # Rolling everything into one zstd-compressed tarball (reduces size hugely)
     gzip -dv ./*.tar.gz
-    tar -vc ./* | zstd -zcT0 --ultra -22 > odysseyra1n_resources.tar.zst
+    tar -vc ./* | zstd --long -zcT0 --ultra -22 > odysseyra1n_resources.tar.zst
     find ./* -not -name "odysseyra1n_resources.tar.zst" -exec rm {} +
 )
 

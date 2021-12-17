@@ -23,7 +23,7 @@ jobs:
           curl -LO https://github.com/facebook/zstd/releases/download/v1.5.0/zstd-1.5.0.tar.gz
           sudo tar xf zstd-1.5.0.tar.gz -C /opt
           cd /opt/zstd*
-          sudo make -j2
+          sudo make
           sudo make install
         )
     - 

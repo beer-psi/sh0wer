@@ -125,6 +125,7 @@ chroot work/chroot update-initramfs -u
 
 # * Replacing coreutils with their Debian equivalents
 cat << "!" | chroot work/chroot /bin/bash
+ln -sfv "$(command -v busybox)" /usr/bin/which
 busybox --list-all | grep -v "busybox" | while read -r line; do 
     ln -sfv "$(which busybox)" "/$line"
 done 
@@ -132,9 +133,10 @@ done
 
 # * Purge a bunch of packages that won't be used anyway
 cat << ! | chroot work/chroot /usr/bin/env PATH=/usr/bin:/bin:/usr/sbin:/sbin /bin/bash
-dpkg -P --force-all cpio gzip libgpm2 curl ca-certificates build-essential
+apt purge curl ca-certificates build-essential
 apt autoremove
-dpkg -P --force-all apt initramfs-tools initramfs-tools-core 
+dpkg -P --force-all apt cpio gzip libgpm2
+dpkg -P --force-all initramfs-tools initramfs-tools-core 
 dpkg -P --force-all debconf libdebconfclient0
 dpkg -P --force-all init-system-helpers
 dpkg -P --force-all dpkg perl-base

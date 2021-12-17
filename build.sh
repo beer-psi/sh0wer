@@ -114,7 +114,7 @@ rm -rf zstd*.tar.gz /opt/zstd*
 ln -s /usr/local/bin/zstd /usr/bin/zstd
 !
 sed -i 's/COMPRESS=gzip/COMPRESS=zstd/' work/chroot/etc/initramfs-tools/initramfs.conf
-sed -i 's/zstd -q -19 -T0/zstd -q --ultra -22 -T0/g' work/chroot/sbin/mkinitramfs
+sed -i 's/zstd -q -19 -T0/zstd -q --ultra --long -22 -T0/g' work/chroot/sbin/mkinitramfs
 
 # Debloating Debian
 # * Removing unneeded kernel modules (360MB size reduction)

@@ -10,10 +10,11 @@ Download the appropriate ISO for your PC:
 - `x86_64` is for 64-bit CPUs
 - `x86` is for 32-bit CPUs
 
-If you don't know what type of CPU you have, open File Explorer, right click This PC and select Properties, look for the line "System type":
+Windows users: If you don't know what type of CPU you have, open File Explorer, right click This PC and select Properties, look for the line "System type":
 - `x64-based processor` means your CPU is 64-bit
 - `x86-based processor` means your CPU is 32-bit
 
+Instructions
 1. Get the latest "Release" ISO from the [Releases tab](https://github.com/extradummythicc/yacd/releases)
 2. Get the ROSA Image Writer [here](http://wiki.rosalab.ru/en/images/6/62/RosaImageWriter-2.6.2-win.zip). If another USB flashing tool (like balenaEtcher) floats your boat, you can use it instead.
 3. Open ROSA Image Writer and write the downloaded ISO to your USB

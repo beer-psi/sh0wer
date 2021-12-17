@@ -10,10 +10,7 @@
 # Stage 0: Get download links
 # * If any link is filled, the script will download from that link.
 # * If empty, get the latest version from the website.
-KERNEL_MODULES="modules"
-CHECKRA1N_AMD64=""
-CHECKRA1N_I486=""
-SILEO=""
+source ./.env
 [ -z "$CHECKRA1N_AMD64" ] && {
     CHECKRA1N_AMD64=$(curl -s "https://checkra.in/releases/" | grep -Po "https://assets.checkra.in/downloads/linux/cli/x86_64/[0-9a-f]*/checkra1n")
 }
@@ -22,6 +19,9 @@ SILEO=""
 }
 [ -z "$SILEO" ] && {
     SILEO="https://github.com$(curl -s https://github.com/Sileo/Sileo/releases | grep -Po "/Sileo\/Sileo/releases/download/[\d.]+/org\.coolstar\.sileo_[\d.]+_iphoneos-arm\.deb" | head -1)"
+}
+[ -z "$ZSTD" ] && {
+    ZSTD="https://github.com$(curl -s https://github.com/facebook/zstd/releases | grep -Po "/facebook\/zstd/releases/download/v[\d.]+/zstd-[\d.]+\.tar\.gz" | head -1)"
 }
 
 # Stage 1: User input
@@ -66,7 +66,7 @@ done
     umount work/chroot/sys
     umount work/chroot/dev
 } > /dev/null 2>&1
-rm -rf work/
+rm -rf work
 
 set -e -u -v
 
@@ -81,7 +81,7 @@ start_time="$(date -u +%s)"
 #   * Stripping unneeded kernel modules
 #   * Remove unneeded files and directories
 mkdir -p work/chroot work/iso/live work/iso/boot/grub
-debootstrap --variant=minbase --arch="$REPO_ARCH" stable work/chroot 'http://deb.debian.org/debian/'
+debootstrap --variant=minbase --arch="$REPO_ARCH" sid work/chroot 'http://deb.debian.org/debian/'
 mount --bind /proc work/chroot/proc
 mount --bind /sys work/chroot/sys
 mount --bind /dev work/chroot/dev
@@ -91,40 +91,73 @@ cat << ! | chroot work/chroot /usr/bin/env PATH=/usr/bin:/bin:/usr/sbin:/sbin /b
 # Set debian frontend to noninteractive
 export DEBIAN_FRONTEND=noninteractive
 
-# Install requiered packages
-apt-get install -y --no-install-recommends linux-image-$KERNEL_ARCH live-boot \
-    systemd systemd-sysv usbmuxd libusbmuxd-tools openssh-client sshpass xz-utils dialog
+# Install required packages
+apt-get update
+apt-get install -y --no-install-recommends busybox linux-image-$KERNEL_ARCH live-boot \
+    systemd systemd-sysv usbmuxd libusbmuxd-tools openssh-client sshpass dialog 
+
+# This is for building zstd latest (Debian sid is still behind)
+apt-get install -y --no-install-recommends build-essential curl ca-certificates
+
+curl -LO $ZSTD
+tar xf zstd*.tar.gz -C /opt
+(
+    cd /opt/zstd*
+    make
+    make install
+)
+rm -rf zstd*.tar.gz /opt/zstd*
+ln -s /usr/local/bin/zstd /usr/bin/zstd
 !
-sed -i 's/COMPRESS=gzip/COMPRESS=xz/' work/chroot/etc/initramfs-tools/initramfs.conf
+sed -i 's/COMPRESS=gzip/COMPRESS=zstd/' work/chroot/etc/initramfs-tools/initramfs.conf
+sed -i 's/zstd -q -19 -T0/zstd -q --ultra -22 -T0/g' work/chroot/sbin/mkinitramfs
 
-# Strip unneeded kernel modules
-sed -i '/^[[:blank:]]*#/d;s/#.*//;/^$/d' $KERNEL_MODULES
-modules_to_keep=()
-while IFS="" read -r p || [ -n "$p" ]
-do
-    modules_to_keep+=("-not" "-name" "$p") 
-done < $KERNEL_MODULES
-find work/chroot/lib/modules/*/kernel/* -type f "${modules_to_keep[@]}" -delete
-find work/chroot/lib/modules/*/kernel/* -type d -empty -delete
-
-# Compress remaining kernel modules
+# Debloating Debian
+# * Removing unneeded kernel modules (360MB size reduction)
+if [ -n "$KERNEL_MODULES" ]; then
+    sed -i '/^[[:blank:]]*#/d;s/#.*//;/^$/d' "$KERNEL_MODULES"
+    modules_to_keep=()
+    while IFS="" read -r p || [ -n "$p" ]
+    do
+        modules_to_keep+=("-not" "-name" "$p") 
+    done < "$KERNEL_MODULES"
+    find work/chroot/lib/modules/*/kernel/* -type f "${modules_to_keep[@]}" -delete
+    find work/chroot/lib/modules/*/kernel/* -type d -empty -delete
+fi
+# * Compress remaining kernel modules (like 3MB size reduction)
 find work/chroot/lib/modules/*/kernel/* -type f -name "*.ko" -exec strip --strip-unneeded {} +
-find work/chroot/lib/modules/*/kernel/* -type f -name "*.ko" -exec xz --x86 -e9T0 {} +
+find work/chroot/lib/modules/*/kernel/* -type f -name "*.ko" -exec zstd -zqT0 --ultra -22 {} +
 depmod -b work/chroot "$(basename "$(find work/chroot/lib/modules/* -maxdepth 0)")"
-
 chroot work/chroot update-initramfs -u
 
-# Remove unneeded files and folders
+# * Purge a bunch of packages that won't be used anyway
 cat << ! | chroot work/chroot /usr/bin/env PATH=/usr/bin:/bin:/usr/sbin:/sbin /bin/bash
-dpkg -P --force-all cpio gzip libgpm2 apt
+export DEBIAN_FRONTEND=noninteractive
+
+apt-get -y purge make dpkg-dev g++ gcc libc-dev make build-essential curl ca-certificates perl-modules-5.32 perl libdpkg-perl
+apt-get -y autoremove
+dpkg -P --force-all apt cpio gzip libgpm2
 dpkg -P --force-all initramfs-tools initramfs-tools-core 
 dpkg -P --force-all debconf libdebconfclient0
 dpkg -P --force-all init-system-helpers
 dpkg -P --force-all dpkg perl-base
 !
+
+# * Replacing coreutils with their Debian equivalents (123MB size reduction)
+cat << "!" | chroot work/chroot /bin/bash
+ln -sfv "$(command -v busybox)" /usr/bin/which
+busybox --list | egrep -v "(busybox)|(init)" | while read -r line; do
+    if which $line &> /dev/null; then                               # If command exists
+        if [ "$(stat -c%s $(which $line))" -gt 16 ]; then           # And we can gain storage space from making a symlink (symlinks are 16 bytes)
+            ln -sfv "$(which busybox)" "$(which $line)"             # Then make one (ignore nonexistent commands /shrug)
+        fi
+    fi
+done 
+!
+
+# * Empty unused directories
 (
     cd work/chroot
-    # Empty some directories to make the system smaller
     rm -f etc/mtab \
         etc/fstab \
         etc/ssh/ssh_host* \
@@ -148,25 +181,29 @@ dpkg -P --force-all dpkg perl-base
 # Copying scripts & Downloading resources
 mkdir -p work/chroot/opt/odysseyra1n work/chroot/opt/a9x
 cp scripts/* work/chroot/usr/local/bin
-cat assets/.dialogrc > work/chroot/root/.dialogrc
+cp assets/.dialogrc work/chroot/root/.dialogrc
 cp assets/PongoConsolidated.bin work/chroot/opt/a9x
 (
     cd work/chroot/usr/local/bin
     curl -sLO "$CHECKRA1N"
     chmod a+x ./*
 )
-(
-    cd work/chroot/opt/odysseyra1n
-    curl -sL -O https://github.com/coolstar/Odyssey-bootstrap/raw/master/bootstrap_1500.tar.gz \
-        -O https://github.com/coolstar/Odyssey-bootstrap/raw/master/bootstrap_1600.tar.gz \
-        -O https://github.com/coolstar/Odyssey-bootstrap/raw/master/bootstrap_1700.tar.gz \
-        -O "$SILEO" \
-        -O https://github.com/coolstar/Odyssey-bootstrap/raw/master/org.swift.libswift_5.0-electra2_iphoneos-arm.deb
-    # Rolling everything into one xz-compressed tarball (reduces size hugely)
-    gzip -dv ./*.tar.gz
-    tar -vc ./* | xz --arm -zvce9T 0 > odysseyra1n_resources.tar.xz
-    find ./* -not -name "odysseyra1n_resources.tar.xz" -exec rm {} +
-)
+if [ "$GITHUB_ACTIONS" = true ]; then
+    cp assets/odysseyra1n/odysseyra1n_resources.tar.zst work/chroot/opt/odysseyra1n
+else
+    (
+        cd work/chroot/opt/odysseyra1n
+        curl -sL -O https://github.com/coolstar/Odyssey-bootstrap/raw/master/bootstrap_1500.tar.gz \
+            -O https://github.com/coolstar/Odyssey-bootstrap/raw/master/bootstrap_1600.tar.gz \
+            -O https://github.com/coolstar/Odyssey-bootstrap/raw/master/bootstrap_1700.tar.gz \
+            -O "$SILEO" \
+            -O https://github.com/coolstar/Odyssey-bootstrap/raw/master/org.swift.libswift_5.0-electra2_iphoneos-arm.deb
+        # Rolling everything into one zstd-compressed tarball (reduces size hugely)
+        gzip -dv ./*.tar.gz
+        tar -vc ./* | zstd -zcT0 --ultra -22 > odysseyra1n_resources.tar.zst
+        find ./* -not -name "odysseyra1n_resources.tar.zst" -exec rm {} +
+    )
+fi
 
 
 # Configuring autologin
@@ -191,7 +228,7 @@ echo ' |___/'
 echo ''
 echo 'Yet Another checkra1n Distribution'
 echo '      by beerpsi'
-linux /boot/vmlinuz boot=live quiet
+linux /boot/vmlinuz boot=live
 initrd /boot/initrd.img
 boot
 !
@@ -207,13 +244,13 @@ export DIALOGRC=/root/.dialogrc
 !
 
 # Stage 4: Build the ISO
-# * Make an xz-compressed squashfs
+# * Make an zstd-compressed squashfs
 umount work/chroot/proc
 umount work/chroot/sys
 umount work/chroot/dev
 cp work/chroot/vmlinuz work/iso/boot
 cp work/chroot/initrd.img work/iso/boot
-mksquashfs work/chroot work/iso/live/filesystem.squashfs -noappend -e boot -comp xz -Xbcj x86 -Xdict-size 100%
+mksquashfs work/chroot work/iso/live/filesystem.squashfs -noappend -e boot -comp zstd -Xcompression-level 22
 
 ## Creates output ISO dir (easier for GitHub Actions)
 mkdir -p out

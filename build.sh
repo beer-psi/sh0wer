@@ -135,8 +135,8 @@ done
 cat << ! | chroot work/chroot /usr/bin/env PATH=/usr/bin:/bin:/usr/sbin:/sbin /bin/bash
 export DEBIAN_FRONTEND=noninteractive
 
-apt-get purge curl ca-certificates build-essential
-apt-get autoremove
+apt-get -y purge curl ca-certificates build-essential
+apt-get -y autoremove
 dpkg -P --force-all apt cpio gzip libgpm2
 dpkg -P --force-all initramfs-tools initramfs-tools-core 
 dpkg -P --force-all debconf libdebconfclient0

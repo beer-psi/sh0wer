@@ -10,19 +10,18 @@ Download the appropriate ISO for your PC:
 - `x86_64` is for 64-bit CPUs
 - `x86` is for 32-bit CPUs
 
-Windows users: If you don't know what type of CPU you have, open File Explorer, right click This PC and select Properties, look for the line "System type":
+If you don't know what type of CPU you have, open File Explorer, right click This PC and select Properties, look for the line "System type":
 - `x64-based processor` means your CPU is 64-bit
 - `x86-based processor` means your CPU is 32-bit
 
-Instructions
-1. Get the latest "Release" ISO from the [Releases tab](https://github.com/extradummythicc/yacd/releases)
+1. Get the latest "Release" ISO from the [Releases tab](https://github.com/extradummythicc/sh0wer/releases)
 2. Get the ROSA Image Writer [here](http://wiki.rosalab.ru/en/images/6/62/RosaImageWriter-2.6.2-win.zip). If another USB flashing tool (like balenaEtcher) floats your boat, you can use it instead.
 3. Open ROSA Image Writer and write the downloaded ISO to your USB
 4. Reboot, enter your BIOS menu (you'll have to google for this) and select to boot from the USB.
 
-After you're done using yacd, if you want to wipe your USB so you can use it normally, just use the "Clear" button inside ROSA.
+After you're done using sh0wer, if you want to wipe your USB so you can use it normally, just use the "Clear" button inside ROSA.
 
-# Building yacd
+# Building sh0wer
 ## Installing build dependencies
 ### Debian and its derivatives
 ```
@@ -32,19 +31,16 @@ sudo apt-get install -y --no-install-recommends wget debootstrap grub-pc-bin \
     libusb-1.0-0-dev gcc make gzip xz-utils unzip libc6-dev
 ```
 ## Environment variables
-These environment variables can be set prior to executing the script
+All build variables are inside the `.env` file.
 ```bash
 VERSION="YOUR_VERSION"
 ARCH="ARCHITECTURE_TO_BUILD" # Available architectures: x86_64 and x86
-```
 
-These variables set the download link for various resources.  
-They can be edited inside `build.sh`, however they are not needed:
-```bash
 # Leave empty to automatically grab the latest version
 CHECKRA1N_AMD64=""
 CHECKRA1N_I486=""
 SILEO=""
+ZSTD="" # gz-compressed archive of release from https://github.com/facebook/zstd
 ```
 
 ## Advanced: Kernel modules

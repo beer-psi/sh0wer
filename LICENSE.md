@@ -1,4 +1,4 @@
-### Licensing for yacd, with exception to third party software as mentioned below
+### Licensing for sh0wer, with exception to third party software as mentioned below
 
 BSD Zero Clause License
 

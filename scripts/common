@@ -69,6 +69,18 @@ yacd_logo() {
     echo 'Yet Another checkra1n Distribution'
     echo '      by beerpsi'
 }
+
+sh0wer_logo(){
+    echo ''
+    echo '     .-.     '
+    echo '    (   ).   '
+    echo '   (___(__)  '
+    echo "    ' ' ' '  "
+    echo "   ' ' ' '   "
+    echo ''
+    echo '   sh0wer    '
+    echo '  by beerpsi '
+}
     
 prompt() {
   printf '%s' "$1"

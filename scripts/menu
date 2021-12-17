@@ -6,7 +6,7 @@ width="$(($(tput cols) - 20))"
 
 tput civis
 while true; do
-    SELECTION=$(dialog --colors --no-cancel --title 'yacd' --menu '' $height $width 7 \
+    SELECTION=$(dialog --colors --no-cancel --title 'sh0wer' --menu '' $height $width 7 \
         1 checkra1n \
         2 'checkra1n (A9X)' \
         3 odysseyra1n \
@@ -43,13 +43,13 @@ while true; do
         ;;
     6)
         clear
-        yacd_logo
+        sh0wer_logo
         sleep 2
         /usr/sbin/halt -p
         ;;
     7) 
         clear
-        yacd_logo
+        sh0wer_logo
         sleep 2
         /usr/sbin/halt --reboot
         ;;

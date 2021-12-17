@@ -79,7 +79,9 @@ jobs:
       -
         name: Get version information
         run: |
-          echo "version=$(cat version)" >> $GITHUB_ENV
+          source ./.env
+          echo "version=$VERSION" >> $GITHUB_ENV
+          echo "name=$NAME" >> $GITHUB_ENV
           echo "todayDate=$(date +%Y%m%dT%H%M%SZ)" >> $GITHUB_ENV
       -
         name: Create release
@@ -98,10 +100,11 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           todayDate: ${{ env.todayDate }}
           version: ${{ env.version }}
+          name: ${{ env.name }}
         run: |
           set -x
-          mv ./artifact/yacd-$version-x86_64.iso ./artifact/yacd-$todayDate-x86_64.iso
-          mv ./artifact/yacd-$version-x86.iso ./artifact/yacd-$todayDate-x86.iso
+          mv ./artifact/$name-$version-x86_64.iso ./artifact/$name-$todayDate-x86_64.iso
+          mv ./artifact/$name-$version-x86.iso ./artifact/$name-$todayDate-x86.iso
 
           assets=()
           for asset in ./artifact/*; do

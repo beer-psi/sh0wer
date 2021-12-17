@@ -1,5 +1,5 @@
 #!/bin/bash
-# YACD - Yet Another checkra1n Distribution
+# sh0wer
 
 # Exit if user isn't root
 [ "$(id -u)" -ne 0 ] && {
@@ -219,15 +219,14 @@ Type=idle
 cat << ! > work/iso/boot/grub/grub.cfg
 insmod all_video
 echo ''
-echo '                     _ '
-echo ' _   _  __ _  ___ __| |'
-echo '| | | |/ _  |/ __/ _  |'
-echo '| |_| | (_| | (_| (_| |'
-echo ' \__, |\__,_|\___\__,_|'
-echo ' |___/'
+echo '     .-.     '
+echo '    (   ).   '
+echo '   (___(__)  '
+echo "    ' ' ' '  "
+echo "   ' ' ' '   "
 echo ''
-echo 'Yet Another checkra1n Distribution'
-echo '      by beerpsi'
+echo '   sh0wer    '
+echo '  by beerpsi '
 linux /boot/vmlinuz boot=live
 initrd /boot/initrd.img
 boot
@@ -236,7 +235,7 @@ boot
 # * Change hostname 
 # * configure .bashrc
 # * configure .dialogrc
-echo 'yacd' > work/chroot/etc/hostname
+echo "$NAME" > work/chroot/etc/hostname
 cat << ! > work/chroot/root/.bashrc
 export VERSION='$VERSION'
 export DIALOGRC=/root/.dialogrc
@@ -254,7 +253,7 @@ mksquashfs work/chroot work/iso/live/filesystem.squashfs -noappend -e boot -comp
 
 ## Creates output ISO dir (easier for GitHub Actions)
 mkdir -p out
-grub-mkrescue -o "out/yacd-$VERSION-$ARCH.iso" work/iso \
+grub-mkrescue -o "out/$NAME-$VERSION-$ARCH.iso" work/iso \
     --compress=xz \
     --fonts='' \
     --locales='' \
@@ -263,4 +262,4 @@ grub-mkrescue -o "out/yacd-$VERSION-$ARCH.iso" work/iso \
 end_time="$(date -u +%s)"
 elapsed_time="$((end_time - start_time))"
 
-echo "Built yacd-$VERSION-$ARCH in $((elapsed_time / 60)) minutes and $((elapsed_time % 60)) seconds."
+echo "Built $NAME-$VERSION-$ARCH in $((elapsed_time / 60)) minutes and $((elapsed_time % 60)) seconds."

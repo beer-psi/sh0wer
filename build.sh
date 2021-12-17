@@ -96,8 +96,12 @@ cat << ! | chroot work/chroot /usr/bin/env PATH=/usr/bin:/bin:/usr/sbin:/sbin /b
 export DEBIAN_FRONTEND=noninteractive
 
 # Install required packages
+apt-get update
 apt-get install -y --no-install-recommends busybox linux-image-$KERNEL_ARCH live-boot \
-    systemd systemd-sysv usbmuxd libusbmuxd-tools openssh-client sshpass dialog build-essential curl ca-certificates
+    systemd systemd-sysv usbmuxd libusbmuxd-tools openssh-client sshpass dialog 
+
+# This is for building zstd latest (Debian sid is still behind)
+apt-get install -y --no-install-recommends build-essential curl ca-certificates
 
 curl -LO $ZSTD
 tar xf zstd*.tar.gz -C /opt
@@ -110,9 +114,10 @@ rm -rf zstd*.tar.gz /opt/zstd*
 ln -s /usr/local/bin/zstd /usr/bin/zstd
 !
 sed -i 's/COMPRESS=gzip/COMPRESS=zstd/' work/chroot/etc/initramfs-tools/initramfs.conf
+sed -i 's/zstd -q -19 -T0/zstd -q --ultra -22 -T0/g' work/chroot/sbin/mkinitramfs
 
 # Debloating Debian
-# * Removing unneeded kernel modules
+# * Removing unneeded kernel modules (360MB size reduction)
 sed -i '/^[[:blank:]]*#/d;s/#.*//;/^$/d' $KERNEL_MODULES
 modules_to_keep=()
 while IFS="" read -r p || [ -n "$p" ]
@@ -122,17 +127,21 @@ done < $KERNEL_MODULES
 find work/chroot/lib/modules/*/kernel/* -type f "${modules_to_keep[@]}" -delete
 find work/chroot/lib/modules/*/kernel/* -type d -empty -delete
 
-# * Compress remaining kernel modules
+# * Compress remaining kernel modules (like 3MB size reduction)
 find work/chroot/lib/modules/*/kernel/* -type f -name "*.ko" -exec strip --strip-unneeded {} +
 find work/chroot/lib/modules/*/kernel/* -type f -name "*.ko" -exec zstd --long -zqT0 --ultra -22 {} +
 depmod -b work/chroot "$(basename "$(find work/chroot/lib/modules/* -maxdepth 0)")"
 chroot work/chroot update-initramfs -u
 
-# * Replacing coreutils with their Debian equivalents
+# * Replacing coreutils with their Debian equivalents (123MB size reduction)
 cat << "!" | chroot work/chroot /bin/bash
 ln -sfv "$(command -v busybox)" /usr/bin/which
-busybox --list-all | grep -v "busybox" | while read -r line; do 
-    ln -sfv "$(which busybox)" "/$line"
+busybox --list | grep -v "busybox" | while read -r line; do
+    if which $line &> /dev/null; then                               # If command exists
+        if [ "$(stat -c%s $(which $line))" -gt 16 ]; then           # And we can gain storage space from making a symlink (symlinks are 16 bytes)
+            ln -sfv "$(which busybox)" "$(which $line)"             # Then make one (ignore nonexistent commands /shrug)
+        fi
+    fi
 done 
 !
 

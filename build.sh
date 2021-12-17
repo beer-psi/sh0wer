@@ -125,6 +125,7 @@ while IFS="" read -r p || [ -n "$p" ]; do
     fi
     ln -sf /usr/bin/busybox $(which "$p") 
 done < busybox-programs
+rm busybox-programs
 
 # Purge a bunch of packages that won't be used anyway
 dpkg -P --force-all cpio gzip libgpm2 apt

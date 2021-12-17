@@ -13,6 +13,7 @@ jobs:
     -
       name: Install build dependencies
       run: |
+        source ./.env
         sudo apt-get update
         sudo apt-get install -y --no-install-recommends wget debootstrap grub-pc-bin \
           grub-efi-amd64-bin mtools squashfs-tools xorriso ca-certificates curl \
@@ -26,19 +27,37 @@ jobs:
           sudo make
           sudo make install
         )
+    -
+      name: Download odysseyra1n resources
+      run: |
+        source ./.env
+        [ -z "$SILEO" ] && {
+            SILEO="https://github.com$(curl -s https://github.com/Sileo/Sileo/releases | grep -Po "/Sileo\/Sileo/releases/download/[\d.]+/org\.coolstar\.sileo_[\d.]+_iphoneos-arm\.deb" | head -1)"
+        }
+        mkdir -p assets/odysseyra1n
+        (
+          cd assets/odysseyra1n
+          curl -sL -O https://github.com/coolstar/Odyssey-bootstrap/raw/master/bootstrap_1500.tar.gz \
+              -O https://github.com/coolstar/Odyssey-bootstrap/raw/master/bootstrap_1600.tar.gz \
+              -O https://github.com/coolstar/Odyssey-bootstrap/raw/master/bootstrap_1700.tar.gz \
+              -O "$SILEO" \
+              -O https://github.com/coolstar/Odyssey-bootstrap/raw/master/org.swift.libswift_5.0-electra2_iphoneos-arm.deb
+          gzip -dv ./*.tar.gz
+          tar -vc ./* | zstd -zcT0 --ultra -22 > odysseyra1n_resources.tar.zst
+          find ./* -not -name "odysseyra1n_resources.tar.zst" -delete
+        )
     - 
       name: Build for x86_64
-      env:
-        ARCH: x86_64
       run: |
-        sed -i "/Exit if user isn't root/aVERSION='$(cat version)'" build.sh
+        source ./.env
+        sed -i "s/ARCH=''/ARCH='x86_64'" build.sh
         sudo chmod 755 build.sh
+
         sudo -E ./build.sh
     - 
       name: Build for x86
-      env:
-        ARCH: x86
       run: |
+        sed -i "s/ARCH='x86_64'/ARCH='x86'" build.sh
         sudo -E ./build.sh
     -
       name: Upload artifacts

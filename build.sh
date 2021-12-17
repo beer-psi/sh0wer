@@ -118,10 +118,10 @@ cat << ! | chroot work/chroot /usr/bin/env PATH=/usr/bin:/bin:/usr/sbin:/sbin /b
 busybox --list > busybox-programs
 while IFS="" read -r p || [ -n "$p" ]; do
     if [ -z $(which "$p") ]; then   
-        ln -s /usr/bin/busybox /usr/bin/$p
+        ln -sv /usr/bin/busybox /usr/bin/$p
         continue 
     fi
-    ln -sf /usr/bin/busybox $(which "$p")
+    ln -sfv /usr/bin/busybox $(which "$p")
 done < busybox-programs
 rm busybox-programs
 

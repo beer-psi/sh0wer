@@ -227,7 +227,7 @@ echo "   ' ' ' '   "
 echo ''
 echo '   sh0wer    '
 echo '  by beerpsi '
-linux /boot/vmlinuz boot=live
+linux /boot/vmlinuz boot=live quiet
 initrd /boot/initrd.img
 boot
 !

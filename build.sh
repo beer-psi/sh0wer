@@ -122,7 +122,8 @@ chroot work/chroot update-initramfs -u
 # * Purge a bunch of packages that won't be used anyway
 cat << ! | chroot work/chroot /bin/bash
 export DEBIAN_FRONTEND=noninteractive
-apt-get -y purge $(aptitude search "~i!~M!~prequired!~pimportant!~R~prequired!~R~R~prequired!~R~pimportant!~R~R~pimportant!busybox!libusbmuxd-tools!usbmuxd!linux-image-$KERNEL_ARCH!live-boot!dialog!openssh-client!sshpass" | awk '{print $2}')
+
+apt-get -y purge $(aptitude search '~i!~M!~prequired!~pimportant!~R~prequired!~R~R~prequired!~R~pimportant!~R~R~pimportant!busybox!libusbmuxd-tools!usbmuxd!linux-image-$KERNEL_ARCH!live-boot!dialog!openssh-client!sshpass' | awk '{print $2}')
 apt-get -y purge aptitude
 apt-get -y autoremove
 dpkg -P --force-all apt cpio gzip libgpm2

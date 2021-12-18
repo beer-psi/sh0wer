@@ -95,7 +95,7 @@ export DEBIAN_FRONTEND=noninteractive
 apt-get update
 apt-get install -y --no-install-recommends busybox linux-image-$KERNEL_ARCH live-boot \
     systemd systemd-sysv usbmuxd libusbmuxd-tools openssh-client sshpass dialog \
-    build-essential curl ca-certificates aptitude
+    build-essential curl ca-certificates
 
 curl -LO $ZSTD
 tar xf zstd*.tar.gz -C /opt
@@ -120,14 +120,14 @@ depmod -b work/chroot "$(basename "$(find work/chroot/lib/modules/* -maxdepth 0)
 chroot work/chroot update-initramfs -u
 
 # * Purge a bunch of packages that won't be used anyway
-cat << ! | chroot work/chroot /bin/bash
+cat << ! | chroot work/chroot /usr/bin/env PATH=/usr/bin:/bin:/usr/sbin:/sbin /bin/bash
 export DEBIAN_FRONTEND=noninteractive
-
-apt-get -y purge $(aptitude search '~i!~M!~prequired!~pimportant!~R~prequired!~R~R~prequired!~R~pimportant!~R~R~pimportant!busybox!libusbmuxd-tools!usbmuxd!linux-image-$KERNEL_ARCH!live-boot!dialog!openssh-client!sshpass' | awk '{print $2}')
-apt-get -y purge aptitude
+apt-get -y purge make dpkg-dev g++ gcc libc-dev make build-essential curl ca-certificates \
+    perl-modules-5.32 perl libdpkg-perl libffi8 libk5crypto3 libkeyutils1 libkrb5-3 \
+    libkrb5support0
 apt-get -y autoremove
 dpkg -P --force-all apt cpio gzip libgpm2
-dpkg -P --force-all initramfs-tools initramfs-tools-core 
+dpkg -P --force-all initramfs-tools initramfs-tools-core linux-image-amd64 
 dpkg -P --force-all debconf libdebconfclient0
 dpkg -P --force-all init-system-helpers
 dpkg -P --force-all dpkg perl-base

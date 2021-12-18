@@ -81,7 +81,7 @@ start_time="$(date -u +%s)"
 #   * Stripping unneeded kernel modules
 #   * Remove unneeded files and directories
 mkdir -p work/chroot work/iso/live work/iso/boot/grub
-debootstrap --variant=minbase --arch="$REPO_ARCH" sid work/chroot 'http://deb.debian.org/debian/'
+debootstrap --variant=minbase --arch="$REPO_ARCH" stable work/chroot 'http://deb.debian.org/debian/'
 mount --bind /proc work/chroot/proc
 mount --bind /sys work/chroot/sys
 mount --bind /dev work/chroot/dev
@@ -123,8 +123,7 @@ chroot work/chroot update-initramfs -u
 cat << ! | chroot work/chroot /usr/bin/env PATH=/usr/bin:/bin:/usr/sbin:/sbin /bin/bash
 export DEBIAN_FRONTEND=noninteractive
 apt-get -y purge make dpkg-dev g++ gcc libc-dev make build-essential curl ca-certificates \
-    perl-modules-5.32 perl libdpkg-perl libffi8 libk5crypto3 libkeyutils1 libkrb5-3 \
-    libkrb5support0
+    perl-modules-5.32 perl libdpkg-perl libffi8 libk5crypto3 libkeyutils1 libkrb5-3 libkrb5support0
 apt-get -y autoremove
 dpkg -P --force-all apt cpio gzip libgpm2
 dpkg -P --force-all initramfs-tools initramfs-tools-core

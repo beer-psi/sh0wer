@@ -61,7 +61,7 @@ if [[ $VER = 12.1* ]] || [[ $VER = 12.0* ]]; then
     dpkg -i org.swift.libswift_5.0-electra2_iphoneos-arm.deb > /dev/null
 fi
 echo "   -> Installing Sileo and upgrading Procursus packages..."
-dpkg -i org.coolstar.sileo_2.2.3_iphoneos-arm.deb > /dev/null
+dpkg -i org.coolstar.sileo_*_iphoneos-arm.deb > /dev/null
 uicache -p /Applications/Sileo.app
 mkdir -p /etc/apt/sources.list.d /etc/apt/preferences.d
 {

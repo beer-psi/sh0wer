@@ -95,7 +95,7 @@ export DEBIAN_FRONTEND=noninteractive
 apt-get update
 apt-get install -y --no-install-recommends busybox linux-image-$KERNEL_ARCH live-boot \
     systemd systemd-sysv usbmuxd libusbmuxd-tools openssh-client sshpass dialog \
-    build-essential curl ca-certificates
+    build-essential curl ca-certificates aptitude
 
 curl -LO $ZSTD
 tar xf zstd*.tar.gz -C /opt
@@ -120,10 +120,10 @@ depmod -b work/chroot "$(basename "$(find work/chroot/lib/modules/* -maxdepth 0)
 chroot work/chroot update-initramfs -u
 
 # * Purge a bunch of packages that won't be used anyway
-cat << ! | chroot work/chroot /usr/bin/env PATH=/usr/bin:/bin:/usr/sbin:/sbin /bin/bash
+cat << ! | chroot work/chroot /bin/bash
 export DEBIAN_FRONTEND=noninteractive
-
-apt-get -y purge make dpkg-dev g++ gcc libc-dev make build-essential curl ca-certificates perl-modules-5.32 perl libdpkg-perl
+apt-get -y purge $(aptitude search "~i!~M!~prequired!~pimportant!~R~prequired!~R~R~prequired!~R~pimportant!~R~R~pimportant!busybox!libusbmuxd-tools!usbmuxd!linux-image-$KERNEL_ARCH!live-boot!dialog!openssh-client!sshpass" | awk '{print $2}')
+apt-get -y purge aptitude
 apt-get -y autoremove
 dpkg -P --force-all apt cpio gzip libgpm2
 dpkg -P --force-all initramfs-tools initramfs-tools-core 
@@ -135,7 +135,7 @@ dpkg -P --force-all dpkg perl-base
 # * Replacing coreutils with their Debian equivalents (123MB size reduction)
 cat << "!" | chroot work/chroot /bin/bash
 ln -sfv "$(command -v busybox)" /usr/bin/which
-busybox --list | egrep -v "(busybox)|(init)" | while read -r line; do
+busybox --list | egrep -v "(busybox)|(init)|(sh)" | while read -r line; do
     if which $line &> /dev/null; then                               # If command exists
         if [ "$(stat -c%s $(which $line))" -gt 16 ]; then           # And we can gain storage space from making a symlink (symlinks are 16 bytes)
             ln -sfv "$(which busybox)" "$(which $line)"             # Then make one (ignore nonexistent commands /shrug)
@@ -151,7 +151,8 @@ done
         etc/fstab \
         etc/ssh/ssh_host* \
         root/.wget-hsts \
-        root/.bash_history
+        root/.bash_history \
+        lib/xtables/libip6t_*
     rm -rf var/log/* \
         var/cache/* \
         var/backups/* \
@@ -159,6 +160,7 @@ done
         var/lib/dpkg/* \
         usr/share/doc/* \
         usr/share/man/* \
+        usr/share/fonts/* \
         usr/share/info/* \
         usr/share/icons/* \
         usr/share/locale/* \

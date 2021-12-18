@@ -28,14 +28,14 @@ Press enter to continue.
 read -r null
 
 echo '#!/bin/bash' > odysseyra1n-install.bash
-cat << "EOF" >> odysseyra1n-install.bash
+cat << "!" >> odysseyra1n-install.bash
 if [[ -f "/.bootstrapped" ]]; then
-    echo "Error: Migration from other bootstraps is no longer supported."
+    echo "   -> Error: Migration from other bootstraps is no longer supported."
     rm ./bootstrap* ./*.deb odysseyra1n-install.bash
     exit 1
 fi
 if [[ -f "/.installed_odyssey" ]]; then
-        echo "Error: Odysseyra1n is already installed."
+        echo "   -> Error: Odysseyra1n is already installed."
         rm ./bootstrap* ./*.deb odysseyra1n-install.bash
         exit 1
 fi
@@ -47,7 +47,7 @@ elif [[ "${VER%%.*}" -ge 13 ]] && [[ "${VER%%.*}" -lt 14 ]]; then
 elif [[ "${VER%%.*}" -ge 14 ]] && [[ "${VER%%.*}" -lt 15 ]]; then
     CFVER=1700
 else
-    echo "${VER} not compatible."
+    echo "   -> ${VER} not compatible."
     exit 1
 fi
 mount -o rw,union,update /dev/disk0s1s1
@@ -78,7 +78,7 @@ apt-get update -o Acquire::AllowInsecureRepositories=true
 apt-get dist-upgrade -y --allow-downgrades --allow-unauthenticated
 uicache -p /var/binpack/Applications/loader.app
 rm ./bootstrap* ./*.deb odysseyra1n-install.bash
-EOF
+!
 
 # shellcheck disable=SC2034
 IPROXY=$(iproxy 4444 44 >/dev/null 2>&1 & echo $!)
@@ -105,7 +105,7 @@ else
     ERRORED=1
 fi
 
-if [ $ERRORED -eq "1" ]; then
+if [ $ERRORED -eq 1 ]; then
     failed_echo "The script failed! Please try again"
 else 
     success_echo "Done!"

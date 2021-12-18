@@ -112,20 +112,20 @@ sed -i 's/zstd -q -19 -T0/zstd -q --ultra -22 -T0/g' work/chroot/sbin/mkinitramf
 
 # Debloating Debian
 # * Removing unneeded kernel modules (360MB size reduction)
-if [ -n "$KERNEL_MODULES" ]; then
-    cat work/chroot/etc/initramfs-tools/modules >> "$KERNEL_MODULES"
-    sed -i '/^[[:blank:]]*#/d;s/#.*//;/^$/d' "$KERNEL_MODULES"
-    modules_to_keep=()
-    while IFS="" read -r p || [ -n "$p" ]
-    do
-        modules_to_keep+=("-not" "-name" "$p") 
-    done < "$KERNEL_MODULES"
-    find work/chroot/lib/modules/*/kernel/* -type f "${modules_to_keep[@]}" -delete
-    find work/chroot/lib/modules/*/kernel/* -type d -empty -delete
-fi
+# if [ -n "$KERNEL_MODULES" ]; then
+#     cat work/chroot/etc/initramfs-tools/modules >> "$KERNEL_MODULES"
+#     sed -i '/^[[:blank:]]*#/d;s/#.*//;/^$/d' "$KERNEL_MODULES"
+#     modules_to_keep=()
+#     while IFS="" read -r p || [ -n "$p" ]
+#     do
+#         modules_to_keep+=("-not" "-name" "$p") 
+#     done < "$KERNEL_MODULES"
+#     find work/chroot/lib/modules/*/kernel/* -type f "${modules_to_keep[@]}" -delete
+#     find work/chroot/lib/modules/*/kernel/* -type d -empty -delete
+# fi
 # * Compress remaining kernel modules (like 3MB size reduction)
 find work/chroot/lib/modules/*/kernel/* -type f -name "*.ko" -exec strip --strip-unneeded {} +
-find work/chroot/lib/modules/*/kernel/* -type f -name "*.ko" -exec xz --x86 -e9T0 {} +
+find work/chroot/lib/modules/*/kernel/* -type f -name "*.ko" -exec zstd --rm --ultra -zq22 -T0 {} +
 depmod -b work/chroot "$(basename "$(find work/chroot/lib/modules/* -maxdepth 0)")"
 chroot work/chroot update-initramfs -u
 
@@ -248,7 +248,7 @@ umount work/chroot/sys
 umount work/chroot/dev
 cp work/chroot/vmlinuz work/iso/boot
 cp work/chroot/initrd.img work/iso/boot
-mksquashfs work/chroot work/iso/live/filesystem.squashfs -noappend -e boot -comp xz -Xbcj x86 -Xdict-size 100%
+mksquashfs work/chroot work/iso/live/filesystem.squashfs -noappend -e boot -comp zstd -Xcompression-level 22
 
 ## Creates output ISO dir (easier for GitHub Actions)
 mkdir -p out

@@ -36,7 +36,7 @@ success_echo(){
 
 enter_to_quit() {
     kill "$IPROXY" "$CHECKRA1N" > /dev/null 2>&1
-    printf 'Press enter to quit'
+    echo 'Press enter to quit'
     # shellcheck disable=SC2034
     read -r null
 }
@@ -68,6 +68,18 @@ yacd_logo() {
     echo ''
     echo 'Yet Another checkra1n Distribution'
     echo '      by beerpsi'
+}
+
+sh0wer_logo(){
+    echo ''
+    echo '     .-.     '
+    echo '    (   ).   '
+    echo '   (___(__)  '
+    echo "    ' ' ' '  "
+    echo "   ' ' ' '   "
+    echo ''
+    echo '   sh0wer    '
+    echo '  by beerpsi '
 }
     
 prompt() {

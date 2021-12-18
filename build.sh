@@ -94,7 +94,7 @@ export DEBIAN_FRONTEND=noninteractive
 # Install required packages
 apt-get update
 apt-get install -y --no-install-recommends busybox linux-image-$KERNEL_ARCH live-boot \
-    systemd systemd-sysv usbmuxd libusbmuxd-tools openssh-client sshpass dialog \
+    sysvinit-core orphan-sysvinit-scripts usbmuxd libusbmuxd-tools openssh-client sshpass dialog \
     build-essential curl ca-certificates
 
 curl -LO $ZSTD

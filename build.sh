@@ -107,23 +107,13 @@ tar xf zstd*.tar.gz -C /opt
 rm -rf zstd*.tar.gz /opt/zstd*
 ln -sf /usr/local/bin/zstd /usr/bin/zstd
 !
+
+# Switch compression to zstd 22 for space savings
 sed -i 's/COMPRESS=gzip/COMPRESS=zstd/' work/chroot/etc/initramfs-tools/initramfs.conf
 sed -i 's/zstd -q -19 -T0/zstd -q --ultra -22 -T0/g' work/chroot/sbin/mkinitramfs
 
 # Debloating Debian
-# * Removing unneeded kernel modules (360MB size reduction)
-# if [ -n "$KERNEL_MODULES" ]; then
-#     cat work/chroot/etc/initramfs-tools/modules >> "$KERNEL_MODULES"
-#     sed -i '/^[[:blank:]]*#/d;s/#.*//;/^$/d' "$KERNEL_MODULES"
-#     modules_to_keep=()
-#     while IFS="" read -r p || [ -n "$p" ]
-#     do
-#         modules_to_keep+=("-not" "-name" "$p") 
-#     done < "$KERNEL_MODULES"
-#     find work/chroot/lib/modules/*/kernel/* -type f "${modules_to_keep[@]}" -delete
-#     find work/chroot/lib/modules/*/kernel/* -type d -empty -delete
-# fi
-# * Compress remaining kernel modules (like 3MB size reduction)
+# * Compress kernel modules
 find work/chroot/lib/modules/*/kernel/* -type f -name "*.ko" -exec strip --strip-unneeded {} +
 find work/chroot/lib/modules/*/kernel/* -type f -name "*.ko" -exec xz --x86 -e9T0 {} +
 depmod -b work/chroot "$(basename "$(find work/chroot/lib/modules/* -maxdepth 0)")"
@@ -226,7 +216,7 @@ echo "   ' ' ' '   "
 echo ''
 echo '    sh0wer   '
 echo '  by beerpsi '
-linux /boot/vmlinuz boot=live
+linux /boot/vmlinuz boot=live quiet
 initrd /boot/initrd.img
 boot
 !

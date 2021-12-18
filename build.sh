@@ -119,9 +119,6 @@ find work/chroot/lib/modules/*/kernel/* -type f -name "*.ko" -exec xz --x86 -e9T
 depmod -b work/chroot "$(basename "$(find work/chroot/lib/modules/* -maxdepth 0)")"
 chroot work/chroot update-initramfs -u
 
-# * Because we're removing linux-image, gotta move the built initramfs up
-cp work/chroot/vmlinuz work/iso/boot
-cp work/chroot/initrd.img work/iso/boot
 # * Purge a bunch of packages that won't be used anyway
 cat << ! | chroot work/chroot /usr/bin/env PATH=/usr/bin:/bin:/usr/sbin:/sbin /bin/bash
 export DEBIAN_FRONTEND=noninteractive
@@ -130,7 +127,7 @@ apt-get -y purge make dpkg-dev g++ gcc libc-dev make build-essential curl ca-cer
     libkrb5support0
 apt-get -y autoremove
 dpkg -P --force-all apt cpio gzip libgpm2
-dpkg -P --force-all initramfs-tools initramfs-tools-core linux-image-$KERNEL_ARCH 
+dpkg -P --force-all initramfs-tools initramfs-tools-core
 dpkg -P --force-all debconf libdebconfclient0
 dpkg -P --force-all init-system-helpers
 dpkg -P --force-all perl-base dpkg
@@ -242,6 +239,8 @@ export DIALOGRC=/root/.dialogrc
 umount work/chroot/proc
 umount work/chroot/sys
 umount work/chroot/dev
+cp work/chroot/vmlinuz work/iso/boot
+cp work/chroot/initrd.img work/iso/boot
 mksquashfs work/chroot work/iso/live/filesystem.squashfs -noappend -e boot -comp xz -Xbcj x86 -Xdict-size 100%
 
 ## Creates output ISO dir (easier for GitHub Actions)

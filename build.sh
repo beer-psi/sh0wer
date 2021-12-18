@@ -133,7 +133,7 @@ dpkg -P --force-all apt cpio gzip libgpm2
 dpkg -P --force-all initramfs-tools initramfs-tools-core linux-image-$KERNEL_ARCH 
 dpkg -P --force-all debconf libdebconfclient0
 dpkg -P --force-all init-system-helpers
-dpkg -P --force-all dpkg perl-base
+dpkg -P --force-all perl-base dpkg
 !
 
 # * Replacing coreutils with their Debian equivalents (123MB size reduction)

@@ -113,6 +113,19 @@ sed -i 's/COMPRESS=gzip/COMPRESS=zstd/' work/chroot/etc/initramfs-tools/initramf
 sed -i 's/zstd -q -19 -T0/zstd -q --ultra -22 -T0/g' work/chroot/sbin/mkinitramfs
 
 # Debloating Debian
+# * Removing unneeded kernel modules (360MB size reduction)
+ if [ -n "$KERNEL_MODULES" ]; then
+     cat work/chroot/etc/initramfs-tools/modules >> "$KERNEL_MODULES"
+     sed -i '/^[[:blank:]]*#/d;s/#.*//;/^$/d' "$KERNEL_MODULES"
+     modules_to_keep=()
+     while IFS="" read -r p || [ -n "$p" ]
+     do
+         modules_to_keep+=("-not" "-name" "$p") 
+     done < "$KERNEL_MODULES"
+     find work/chroot/lib/modules/*/kernel/* -type f "${modules_to_keep[@]}" -delete
+     find work/chroot/lib/modules/*/kernel/* -type d -empty -delete
+ fi
+
 # * Compress kernel modules
 find work/chroot/lib/modules/*/kernel/* -type f -name "*.ko" -exec strip --strip-unneeded {} +
 find work/chroot/lib/modules/*/kernel/* -type f -name "*.ko" -exec xz --x86 -e9T0 {} +

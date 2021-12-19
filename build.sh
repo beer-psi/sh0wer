@@ -106,8 +106,8 @@ tar xf zstd*.tar.gz -C /opt
 )
 rm -rf zstd*.tar.gz /opt/zstd*
 ln -sf /usr/local/bin/zstd /usr/bin/zstd
-ln -sf /usr/local/lib/libzstd.so.*.* /usr/lib/x86_64-linux-gnu/libzstd.so
-ln -sf /usr/local/lib/libzstd.so.*.* /usr/lib/x86_64-linux-gnu/libzstd.so.1
+ln -sf /usr/local/lib/libzstd.so.*.* /usr/lib/*-linux-gnu/libzstd.so
+ln -sf /usr/local/lib/libzstd.so.*.* /usr/lib/*-linux-gnu/libzstd.so.1
 !
 
 # Switch compression to zstd 22 for space savings

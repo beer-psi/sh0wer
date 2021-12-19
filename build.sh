@@ -17,9 +17,6 @@ source ./.env
 [ -z "$CHECKRA1N_I486" ] && {
     CHECKRA1N_I486=$(curl -s "https://checkra.in/releases/" | grep -Po "https://assets.checkra.in/downloads/linux/cli/i486/[0-9a-f]*/checkra1n")
 }
-[ -z "$SILEO" ] && {
-    SILEO="https://github.com$(curl -s https://github.com/Sileo/Sileo/releases | grep -Po "/Sileo\/Sileo/releases/download/[\d.]+/org\.coolstar\.sileo_[\d.]+_iphoneos-arm\.deb" | head -1)"
-}
 [ -z "$ZSTD" ] && {
     ZSTD="https://github.com$(curl -s https://github.com/facebook/zstd/releases | grep -Po "/facebook\/zstd/releases/download/v[\d.]+/zstd-[\d.]+\.tar\.gz" | head -1)"
 }
@@ -134,6 +131,8 @@ find work/chroot/lib/modules/*/kernel/* -type f -name "*.ko" -exec xz --x86 -e9T
 
 depmod -b work/chroot "$(basename "$(find work/chroot/lib/modules/* -maxdepth 0)")"
 chroot work/chroot update-initramfs -u
+cp work/chroot/vmlinuz work/iso/boot
+cp work/chroot/initrd.img work/iso/boot
 
 # * Purge a bunch of packages that won't be used anyway
 cat << ! | chroot work/chroot /bin/bash
@@ -149,7 +148,7 @@ dpkg -P --force-all init-system-helpers
 dpkg -P --force-all perl-base dpkg
 !
 
-# * Replacing coreutils with their Debian equivalents (123MB size reduction)
+# * Replacing coreutils with their Debian busybox equivalents
 cat << "!" | chroot work/chroot /bin/bash
 ln -sfv "$(command -v busybox)" /usr/bin/which
 busybox --list | egrep -v "(busybox)|(init)|(sh)" | while read -r line; do
@@ -175,6 +174,11 @@ done
         var/backups/* \
         var/lib/apt/* \
         var/lib/dpkg/* \
+        usr/lib/apt/* \
+        usr/lib/locale/* \
+        usr/local/include/* \
+        usr/local/share/man/* \
+        usr/include/* \
         usr/share/doc/* \
         usr/share/man/* \
         usr/share/fonts/* \
@@ -183,7 +187,8 @@ done
         usr/share/locale/* \
         usr/share/zoneinfo/* \
         usr/share/perl*/* \
-        usr/lib/modules/*
+        usr/lib/modules/* \
+        boot/*
 )
 
 # Copying scripts & Downloading resources
@@ -204,7 +209,7 @@ else
         curl -sL -O https://github.com/coolstar/Odyssey-bootstrap/raw/master/bootstrap_1500.tar.gz \
             -O https://github.com/coolstar/Odyssey-bootstrap/raw/master/bootstrap_1600.tar.gz \
             -O https://github.com/coolstar/Odyssey-bootstrap/raw/master/bootstrap_1700.tar.gz \
-            -O "$SILEO" \
+            -O https://github.com/coolstar/Odyssey-bootstrap/raw/master/org.coolstar.sileo_2.2.3_iphoneos-arm.deb \
             -O https://github.com/coolstar/Odyssey-bootstrap/raw/master/org.swift.libswift_5.0-electra2_iphoneos-arm.deb
         # Rolling everything into one zstd-compressed tarball (reduces size hugely)
         gzip -dv ./*.tar.gz
@@ -255,8 +260,6 @@ export DIALOGRC=/root/.dialogrc
 umount work/chroot/proc
 umount work/chroot/sys
 umount work/chroot/dev
-cp work/chroot/vmlinuz work/iso/boot
-cp work/chroot/initrd.img work/iso/boot
 mksquashfs work/chroot work/iso/live/filesystem.squashfs -noappend -e boot -comp zstd -Xcompression-level 22
 
 ## Creates output ISO dir (easier for GitHub Actions)

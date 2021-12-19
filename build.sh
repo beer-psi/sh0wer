@@ -95,7 +95,7 @@ export DEBIAN_FRONTEND=noninteractive
 apt-get update
 apt-get install -y --no-install-recommends busybox linux-image-$KERNEL_ARCH live-boot \
     systemd systemd-sysv usbmuxd libusbmuxd-tools openssh-client sshpass dialog \
-    build-essential curl ca-certificates
+    build-essential curl ca-certificates aptitude
 
 curl -LO $ZSTD
 tar xf zstd*.tar.gz -C /opt
@@ -106,6 +106,8 @@ tar xf zstd*.tar.gz -C /opt
 )
 rm -rf zstd*.tar.gz /opt/zstd*
 ln -sf /usr/local/bin/zstd /usr/bin/zstd
+ln -sf /usr/local/lib/libzstd.so.*.* /usr/lib/x86_64-linux-gnu/libzstd.so
+ln -sf /usr/local/lib/libzstd.so.*.* /usr/lib/x86_64-linux-gnu/libzstd.so.1
 !
 
 # Switch compression to zstd 22 for space savings
@@ -128,7 +130,8 @@ sed -i 's/zstd -q -19 -T0/zstd -q --ultra -22 -T0/g' work/chroot/sbin/mkinitramf
 
 # * Compress kernel modules
 find work/chroot/lib/modules/*/kernel/* -type f -name "*.ko" -exec strip --strip-unneeded {} +
-find work/chroot/lib/modules/*/kernel/* -type f -name "*.ko" -exec xz --x86 -e9T0 {} +
+find work/chroot/lib/modules/*/kernel/* -type f -name "*.ko" -exec zstd -22 --ultra -zqT0 {} +
+find work/chroot/lib/modules/*/kernel/* -type f -name "*.ko" -delete
 depmod -b work/chroot "$(basename "$(find work/chroot/lib/modules/* -maxdepth 0)")"
 chroot work/chroot update-initramfs -u
 
@@ -139,7 +142,7 @@ apt-get -y purge make dpkg-dev g++ gcc libc-dev make build-essential curl ca-cer
     perl-modules-5.32 perl libdpkg-perl
 apt-get -y purge libffi8 libk5crypto3 libkeyutils1 libkrb5-3 libkrb5support0
 apt-get -y autoremove
-dpkg -P --force-all apt cpio gzip libgpm2
+dpkg -P --force-all apt cpio gzip libgpm2 libzstd1
 dpkg -P --force-all initramfs-tools initramfs-tools-core
 dpkg -P --force-all debconf libdebconfclient0
 dpkg -P --force-all init-system-helpers

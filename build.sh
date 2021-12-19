@@ -95,7 +95,7 @@ export DEBIAN_FRONTEND=noninteractive
 apt-get update
 apt-get install -y --no-install-recommends busybox linux-image-$KERNEL_ARCH live-boot \
     systemd systemd-sysv usbmuxd libusbmuxd-tools openssh-client sshpass dialog \
-    build-essential curl ca-certificates aptitude
+    build-essential curl ca-certificates
 
 curl -LO $ZSTD
 tar xf zstd*.tar.gz -C /opt

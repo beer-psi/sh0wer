@@ -91,7 +91,7 @@ export DEBIAN_FRONTEND=noninteractive
 # Install required packages
 apt-get update
 apt-get install -y --no-install-recommends busybox linux-image-$KERNEL_ARCH live-boot \
-    systemd systemd-sysv usbmuxd libusbmuxd-tools openssh-client sshpass dialog \
+    sysvinit-core orphan-sysvinit-scripts usbmuxd libusbmuxd-tools openssh-client sshpass dialog \
     build-essential curl ca-certificates
 
 curl -LO $ZSTD
@@ -151,7 +151,7 @@ dpkg -P --force-all perl-base dpkg
 # * Replacing coreutils with their Debian busybox equivalents
 cat << "!" | chroot work/chroot /bin/bash
 ln -sfv "$(command -v busybox)" /usr/bin/which
-busybox --list | egrep -v "(busybox)|(init)|(sh)" | while read -r line; do
+busybox --list | egrep -v "(busybox)|(init)|(sh)|(find)" | while read -r line; do
     if which $line &> /dev/null; then                               # If command exists
         if [ "$(stat -c%s $(which $line))" -gt 16 ]; then           # And we can gain storage space from making a symlink (symlinks are 16 bytes)
             ln -sfv "$(which busybox)" "$(which $line)"             # Then make one (ignore nonexistent commands /shrug)
@@ -220,13 +220,14 @@ fi
 
 
 # Configuring autologin
-mkdir -p work/chroot/etc/systemd/system/getty@tty1.service.d
-cat << ! > work/chroot/etc/systemd/system/getty@tty1.service.d/override.conf
-[Service]
-ExecStart=
-ExecStart=-/sbin/agetty --noissue --autologin root %I
-Type=idle
-!
+# mkdir -p work/chroot/etc/systemd/system/getty@tty1.service.d
+# cat << ! > work/chroot/etc/systemd/system/getty@tty1.service.d/override.conf
+# [Service]
+# ExecStart=
+# ExecStart=-/sbin/agetty --noissue --autologin root %I
+# Type=idle
+# !
+patch work/chroot/etc/inittab assets/inittab.patch
 
 # Configure grub
 cat << ! > work/iso/boot/grub/grub.cfg

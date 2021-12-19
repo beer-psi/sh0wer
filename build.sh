@@ -87,7 +87,7 @@ mount --bind /sys work/chroot/sys
 mount --bind /dev work/chroot/dev
 cp /etc/resolv.conf work/chroot/etc
 
-cat << ! | chroot work/chroot /usr/bin/env PATH=/usr/bin:/bin:/usr/sbin:/sbin /bin/bash
+cat << ! | chroot work/chroot /bin/bash
 # Set debian frontend to noninteractive
 export DEBIAN_FRONTEND=noninteractive
 

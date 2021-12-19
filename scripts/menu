@@ -1,4 +1,4 @@
-#!/bin/dash
+#!/bin/bash
 . /usr/local/bin/common
 
 height="$(($(tput lines) - 6))"
@@ -6,14 +6,19 @@ width="$(($(tput cols) - 20))"
 
 tput civis
 while true; do
-    SELECTION=$(dialog --colors --no-cancel --title 'sh0wer' --menu '' $height $width 7 \
-        1 checkra1n \
-        2 'checkra1n (A9X)' \
-        3 odysseyra1n \
-        4 SSH \
-        5 Shell \
-        6 Shutdown \
-        7 Reboot 3>&1 1>&2 2>&3 3>&-)
+    ITEMS=(
+        1 'checkra1n'
+        2 'checkra1n (A9X)'
+        3 'odysseyra1n'
+        4 'ssh'
+        5 'Shell'
+        6 'Shutdown'
+        7 'Reboot'
+    )
+    ITEMS_COUNT=$((${#ITEMS[@]}/2))
+    SELECTION=$(dialog \
+        --colors --no-cancel --title 'sh0wer' --menu '' \
+        $height $width $ITEMS_COUNT "${ITEMS[@]}" 3>&1 1>&2 2>&3 3>&-)
     case "$SELECTION" in
     1) 
         clear

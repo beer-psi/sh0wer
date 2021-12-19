@@ -142,7 +142,7 @@ apt-get -y purge make dpkg-dev g++ gcc libc-dev make build-essential curl ca-cer
     perl-modules-5.32 perl libdpkg-perl
 apt-get -y purge libffi8 libk5crypto3 libkeyutils1 libkrb5-3 libkrb5support0
 apt-get -y autoremove
-dpkg -P --force-all apt cpio gzip libgpm2 libzstd1
+dpkg -P --force-all apt cpio gzip libgpm2
 dpkg -P --force-all initramfs-tools initramfs-tools-core
 dpkg -P --force-all debconf libdebconfclient0
 dpkg -P --force-all init-system-helpers

@@ -134,6 +134,8 @@ find work/chroot/lib/modules/*/kernel/* -type f -name "*.ko" -exec xz --x86 -e9T
 
 depmod -b work/chroot "$(basename "$(find work/chroot/lib/modules/* -maxdepth 0)")"
 chroot work/chroot update-initramfs -u
+cp work/chroot/vmlinuz work/iso/boot
+cp work/chroot/initrd.img work/iso/boot
 
 # * Purge a bunch of packages that won't be used anyway
 cat << ! | chroot work/chroot /bin/bash
@@ -162,6 +164,7 @@ done
 !
 
 # * Empty unused directories
+# * Empty unused directories
 (
     cd work/chroot
     rm -f etc/mtab \
@@ -175,6 +178,11 @@ done
         var/backups/* \
         var/lib/apt/* \
         var/lib/dpkg/* \
+        usr/lib/apt/* \
+        usr/lib/locale/* \
+        usr/local/include/* \
+        usr/local/share/man/* \
+        usr/include/* \
         usr/share/doc/* \
         usr/share/man/* \
         usr/share/fonts/* \
@@ -183,7 +191,8 @@ done
         usr/share/locale/* \
         usr/share/zoneinfo/* \
         usr/share/perl*/* \
-        usr/lib/modules/*
+        usr/lib/modules/* \
+        boot/*
 )
 
 # Copying scripts & Downloading resources
@@ -255,8 +264,6 @@ export DIALOGRC=/root/.dialogrc
 umount work/chroot/proc
 umount work/chroot/sys
 umount work/chroot/dev
-cp work/chroot/vmlinuz work/iso/boot
-cp work/chroot/initrd.img work/iso/boot
 mksquashfs work/chroot work/iso/live/filesystem.squashfs -noappend -e boot -comp zstd -Xcompression-level 22
 
 ## Creates output ISO dir (easier for GitHub Actions)

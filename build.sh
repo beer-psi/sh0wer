@@ -94,7 +94,7 @@ export DEBIAN_FRONTEND=noninteractive
 # Install required packages
 apt-get update
 apt-get install -y --no-install-recommends busybox linux-image-$KERNEL_ARCH live-boot \
-    usbmuxd libusbmuxd-tools openssh-client sshpass dialog \
+    usbmuxd initramfs-tools initramfs-tools-core libusbmuxd-tools openssh-client sshpass dialog \
     build-essential curl ca-certificates
 
 curl -LO $ZSTD
@@ -112,7 +112,7 @@ ln -sf /usr/local/lib/libzstd.so.*.* /usr/lib/*-linux-gnu/libzstd.so.1
 
 # Switch compression to zstd 22 for space savings
 sed -i 's/COMPRESS=gzip/COMPRESS=zstd/' work/chroot/etc/initramfs-tools/initramfs.conf
-sed -i 's/zstd -q -19 -T0/zstd -q --ultra -22 -T0/g' work/chroot/sbin/mkinitramfs
+sed -i 's/zstd -q -19 -T0/zstd -q --ultra -22 -T0/g' work/chroot/usr/sbin/mkinitramfs
 
 # Debloating Debian
 # * Removing unneeded kernel modules (360MB size reduction)

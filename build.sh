@@ -95,7 +95,7 @@ export DEBIAN_FRONTEND=noninteractive
 apt-get update
 apt-get install -y --no-install-recommends busybox linux-image-$KERNEL_ARCH live-boot \
     systemd systemd-sysv usbmuxd libusbmuxd-tools openssh-client sshpass dialog \
-    build-essential curl ca-certificates
+    build-essential curl ca-certificates xz-utils
 
 curl -LO $ZSTD
 tar xf zstd*.tar.gz -C /opt
@@ -109,8 +109,8 @@ ln -sf /usr/local/bin/zstd /usr/bin/zstd
 !
 
 # Switch compression to zstd 22 for space savings
-sed -i 's/COMPRESS=gzip/COMPRESS=zstd/' work/chroot/etc/initramfs-tools/initramfs.conf
-sed -i 's/zstd -q -19 -T0/zstd -q --ultra -22 -T0/g' work/chroot/sbin/mkinitramfs
+sed -i 's/COMPRESS=gzip/COMPRESS=xz/' work/chroot/etc/initramfs-tools/initramfs.conf
+sed -i 's/xz --check=crc32/xz --check=crc32 --x86 -e9T0/g' work/chroot/sbin/mkinitramfs
 
 # Debloating Debian
 # * Removing unneeded kernel modules (360MB size reduction)
@@ -136,7 +136,7 @@ chroot work/chroot update-initramfs -u
 cat << ! | chroot work/chroot /bin/bash
 export DEBIAN_FRONTEND=noninteractive
 apt-get -y purge make dpkg-dev g++ gcc libc-dev make build-essential curl ca-certificates \
-    perl-modules-5.32 perl libdpkg-perl
+    perl-modules-5.32 perl libdpkg-perl xz-utils
 apt-get -y purge libffi8 libk5crypto3 libkeyutils1 libkrb5-3 libkrb5support0
 apt-get -y autoremove
 dpkg -P --force-all apt cpio gzip libgpm2

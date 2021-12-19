@@ -81,7 +81,7 @@ start_time="$(date -u +%s)"
 #   * Stripping unneeded kernel modules
 #   * Remove unneeded files and directories
 mkdir -p work/chroot work/iso/live work/iso/boot/grub
-debootstrap --variant=minbase --arch="$REPO_ARCH" sid work/chroot 'http://deb.debian.org/debian/'
+debootstrap --variant=minbase --arch="$REPO_ARCH" ceres work/chroot 'http://deb.devuan.org/merged/'
 mount --bind /proc work/chroot/proc
 mount --bind /sys work/chroot/sys
 mount --bind /dev work/chroot/dev
@@ -94,7 +94,7 @@ export DEBIAN_FRONTEND=noninteractive
 # Install required packages
 apt-get update
 apt-get install -y --no-install-recommends busybox linux-image-$KERNEL_ARCH live-boot \
-    systemd systemd-sysv usbmuxd libusbmuxd-tools openssh-client sshpass dialog \
+    usbmuxd libusbmuxd-tools openssh-client sshpass dialog \
     build-essential curl ca-certificates
 
 curl -LO $ZSTD
@@ -224,13 +224,7 @@ fi
 
 
 # Configuring autologin
-mkdir -p work/chroot/etc/systemd/system/getty@tty1.service.d
-cat << ! > work/chroot/etc/systemd/system/getty@tty1.service.d/override.conf
-[Service]
-ExecStart=
-ExecStart=-/sbin/agetty --noissue --autologin root %I
-Type=idle
-!
+patch work/chroot/etc/inittab assets/inittab.patch
 
 # Configure grub
 cat << ! > work/iso/boot/grub/grub.cfg

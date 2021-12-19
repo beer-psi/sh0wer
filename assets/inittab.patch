@@ -1,0 +1,20 @@
+--- work/chroot/etc/inittab	2021-12-14 14:54:11.000000000 +0700
++++ inittab.new	2021-12-19 14:36:02.619818800 +0700
+@@ -30,7 +30,7 @@
+ z6:6:respawn:/sbin/sulogin --force
+ 
+ # What to do when CTRL-ALT-DEL is pressed.
+-ca:12345:ctrlaltdel:/sbin/shutdown -t1 -a -r now
++ca:12345:ctrlaltdel:/usr/sbin/halt --reboot
+ 
+ # Action on special keypress (ALT-UpArrow).
+ #kb::kbrequest:/bin/echo "Keyboard Request--edit /etc/inittab to let this work."
+@@ -51,7 +51,7 @@
+ # Note that on most Debian systems tty7 is used by the X Window System,
+ # so if you want to add more getty's go ahead but skip tty7 if you run X.
+ #
+-1:2345:respawn:/sbin/getty --noclear 38400 tty1
++1:2345:respawn:/sbin/agetty --autologin root --noissue 38400 tty1 linux
+ 2:23:respawn:/sbin/getty 38400 tty2
+ 3:23:respawn:/sbin/getty 38400 tty3
+ 4:23:respawn:/sbin/getty 38400 tty4

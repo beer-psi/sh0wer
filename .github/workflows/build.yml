@@ -15,9 +15,11 @@ jobs:
       run: |
         source ./.env
         sudo apt-get update
-        sudo apt-get install -y --no-install-recommends wget debootstrap grub-pc-bin \
+        sudo apt-get install -y --no-install-recommends wget grub-pc-bin \
           grub-efi-amd64-bin mtools xorriso ca-certificates curl \
           libusb-1.0-0-dev gcc make gzip unzip libc6-dev xz-utils
+        curl -LO http://packages.devuan.org/devuan/pool/main/d/debootstrap/debootstrap_1.0.89%2Bdevuan2.1_all.deb
+        sudo dpkg -i debootstrap*.deb
     -
       name: Building zstd
       run: |

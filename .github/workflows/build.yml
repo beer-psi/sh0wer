@@ -1,6 +1,6 @@
 name: Build yacd
 
-on: push
+on: [workflow-dispatch,push]
 
 jobs:
   build:

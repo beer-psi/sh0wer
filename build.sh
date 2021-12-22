@@ -151,7 +151,7 @@ dpkg -P --force-all init-system-helpers
 dpkg -P --force-all perl-base dpkg
 !
 
-# * Replacing coreutils with their Debian equivalents (123MB size reduction)
+# * Replacing coreutils with their busybox equivalents
 cat << "!" | chroot work/chroot /bin/bash
 ln -sfv "$(command -v busybox)" /usr/bin/which
 busybox --list | egrep -v "(busybox)|(init)|(sh)" | while read -r line; do

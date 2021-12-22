@@ -58,18 +58,6 @@ ssh_logo() {
     echo "|___/___/_| |_|"
 }
 
-yacd_logo() {
-    echo '                     _ '
-    echo ' _   _  __ _  ___ __| |'
-    echo '| | | |/ _  |/ __/ _  |'
-    echo '| |_| | (_| | (_| (_| |'
-    echo ' \__, |\__,_|\___\__,_|'
-    echo ' |___/'
-    echo ''
-    echo 'Yet Another checkra1n Distribution'
-    echo '      by beerpsi'
-}
-
 sh0wer_logo(){
     echo ''
     echo '     .-.     '

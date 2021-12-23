@@ -24,7 +24,7 @@ jobs:
         sudo apt-get update
         sudo apt-get install -y --no-install-recommends wget debootstrap grub-pc-bin \
           grub-efi-amd64-bin mtools xorriso ca-certificates curl \
-          libusb-1.0-0-dev gcc make gzip unzip libc6-dev xz-utils ld64 cctools-strip
+          libusb-1.0-0-dev gcc make gzip unzip libc6-dev xz-utils ld64 cctools-strip rename
         sudo apt-get install -y clang-format clang-tidy clang-tools clang clangd libc++-dev \
           libc++1 libc++abi-dev libc++abi1 libclang-dev libclang1 liblldb-dev libllvm-ocaml-dev \
           libomp-dev libomp5 lld lldb llvm-dev llvm-runtime llvm python-clang 

@@ -95,7 +95,7 @@ export DEBIAN_FRONTEND=noninteractive
 apt-get update
 apt-get install -y --no-install-recommends busybox linux-image-$KERNEL_ARCH live-boot \
     systemd systemd-sysv usbmuxd libusbmuxd-tools openssh-client sshpass dialog \
-    build-essential curl ca-certificates rename
+    build-essential curl ca-certificates
 
 curl -LO $ZSTD
 tar xf zstd*.tar.gz -C /opt
@@ -222,7 +222,7 @@ export DIALOGRC=/root/.dialogrc
 cat << ! | chroot work/chroot /bin/bash
 export DEBIAN_FRONTEND=noninteractive
 apt-get -y purge make dpkg-dev g++ gcc libc-dev make build-essential curl ca-certificates \
-    perl-modules-5.32 perl libdpkg-perl rename
+    perl-modules-5.32 perl libdpkg-perl
 apt-get -y purge libffi8 libk5crypto3 libkeyutils1 libkrb5-3 libkrb5support0
 apt-get -y autoremove
 dpkg -P --force-all apt cpio gzip libgpm2

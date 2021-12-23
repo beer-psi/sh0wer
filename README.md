@@ -56,7 +56,7 @@ After you're done using sh0wer, if you want to wipe your USB so you can use it n
 sudo apt-get update
 sudo apt-get install -y --no-install-recommends wget debootstrap grub-pc-bin \
     grub-efi-amd64-bin mtools squashfs-tools xorriso ca-certificates curl \
-    libusb-1.0-0-dev gcc make gzip xz-utils unzip libc6-dev zstd
+    libusb-1.0-0-dev gcc make gzip xz-utils unzip libc6-dev zstd rename
 ```
 ## Environment variables
 All build variables are inside the `.env` file.

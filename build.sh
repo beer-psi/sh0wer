@@ -137,32 +137,6 @@ chroot work/chroot update-initramfs -u
 cp work/chroot/vmlinuz work/iso/boot
 cp work/chroot/initrd.img work/iso/boot
 
-# * Purge a bunch of packages that won't be used anyway
-cat << ! | chroot work/chroot /bin/bash
-export DEBIAN_FRONTEND=noninteractive
-apt-get -y purge make dpkg-dev g++ gcc libc-dev make build-essential curl ca-certificates \
-    perl-modules-5.32 perl libdpkg-perl
-apt-get -y purge libffi8 libk5crypto3 libkeyutils1 libkrb5-3 libkrb5support0
-apt-get -y autoremove
-dpkg -P --force-all apt cpio gzip libgpm2
-dpkg -P --force-all initramfs-tools initramfs-tools-core
-dpkg -P --force-all debconf libdebconfclient0
-dpkg -P --force-all init-system-helpers
-dpkg -P --force-all perl-base dpkg
-!
-
-# * Replacing coreutils with their busybox equivalents
-cat << "!" | chroot work/chroot /bin/bash
-ln -sfv "$(command -v busybox)" /usr/bin/which
-busybox --list | egrep -v "(busybox)|(init)|(sh)" | while read -r line; do
-    if which $line &> /dev/null; then                               # If command exists
-        if [ "$(stat -c%s $(which $line))" -gt 16 ]; then           # And we can gain storage space from making a symlink (symlinks are 16 bytes)
-            ln -sfv "$(which busybox)" "$(which $line)"             # Then make one (ignore nonexistent commands /shrug)
-        fi
-    fi
-done 
-!
-
 # * Empty unused directories
 (
     cd work/chroot
@@ -202,11 +176,14 @@ cp assets/PongoConsolidated.bin work/chroot/opt/a9x
 (
     cd work/chroot/usr/local/bin
     curl -sLO "$CHECKRA1N"
-    chmod a+x ./*
 )
 if [ "$GITHUB_ACTIONS" = true ]; then
     cp assets/odysseyra1n/odysseyra1n_resources.tar.zst work/chroot/opt/odysseyra1n
+
+    chroot work/chroot apt-get install -y --no-install-recommends python3
     find assets/pongoOS/build/* -maxdepth 1 -type f -exec cp "{}" work/chroot/opt/pongoOS-latest/ \;
+    find assets/pongoOS/scripts/* -maxdepth 1 -type f -name '*.py' cp "{}" work/chroot/usr/local/bin \;
+    rename -f 's/\.py$//' work/chroot/usr/local/bin/*.py
 else
     (
         cd work/chroot/opt/odysseyra1n
@@ -220,7 +197,20 @@ else
         tar -vc ./* | zstd -zcT0 --ultra -22 > odysseyra1n_resources.tar.zst
         find ./* -not -name "odysseyra1n_resources.tar.zst" -exec rm {} +
     )
+    if [ "$PONGO_LATEST" = 'YES' ]; then
+        chroot work/chroot apt-get install -y --no-install-recommends python3
+        (
+            cd work
+            git clone --recursive --depth 1 https://github.com/checkra1n/pongoOS
+            cd pongoOS
+            make all
+        )
+        find work/pongoOS/build/* -maxdepth 1 -type f -exec cp "{}" work/chroot/opt/pongoOS-latest/ \;
+        find work/pongoOS/scripts/* -maxdepth 1 -type f -name '*.py' cp "{}" work/chroot/usr/local/bin \;
+        rename -f 's/\.py$//' work/chroot/usr/local/bin/*.py
+    fi
 fi
+chmod a+x work/chroot/usr/local/bin/*
 
 
 # Configuring autologin
@@ -257,6 +247,32 @@ cat << ! > work/chroot/root/.bashrc
 export VERSION='$VERSION'
 export DIALOGRC=/root/.dialogrc
 /usr/local/bin/menu
+!
+
+# * Purge a bunch of packages that won't be used anyway
+cat << ! | chroot work/chroot /bin/bash
+export DEBIAN_FRONTEND=noninteractive
+apt-get -y purge make dpkg-dev g++ gcc libc-dev make build-essential curl ca-certificates \
+    perl-modules-5.32 perl libdpkg-perl
+apt-get -y purge libffi8 libk5crypto3 libkeyutils1 libkrb5-3 libkrb5support0
+apt-get -y autoremove
+dpkg -P --force-all apt cpio gzip libgpm2
+dpkg -P --force-all initramfs-tools initramfs-tools-core
+dpkg -P --force-all debconf libdebconfclient0
+dpkg -P --force-all init-system-helpers
+dpkg -P --force-all perl-base dpkg
+!
+
+# * Replacing coreutils with their busybox equivalents
+cat << "!" | chroot work/chroot /bin/bash
+ln -sfv "$(command -v busybox)" /usr/bin/which
+busybox --list | egrep -v "(busybox)|(init)|(sh)" | while read -r line; do
+    if which $line &> /dev/null; then                               # If command exists
+        if [ "$(stat -c%s $(which $line))" -gt 16 ]; then           # And we can gain storage space from making a symlink (symlinks are 16 bytes)
+            ln -sfv "$(which busybox)" "$(which $line)"             # Then make one (ignore nonexistent commands /shrug)
+        fi
+    fi
+done 
 !
 
 # Stage 4: Build the ISO

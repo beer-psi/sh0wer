@@ -164,7 +164,6 @@ done
 !
 
 # * Empty unused directories
-# * Empty unused directories
 (
     cd work/chroot
     rm -f etc/mtab \
@@ -196,7 +195,7 @@ done
 )
 
 # Copying scripts & Downloading resources
-mkdir -p work/chroot/opt/odysseyra1n work/chroot/opt/a9x
+mkdir -p work/chroot/opt/{odysseyra1n,a9x,pongoOS-latest}
 cp scripts/* work/chroot/usr/local/bin
 cp assets/.dialogrc work/chroot/root/.dialogrc
 cp assets/PongoConsolidated.bin work/chroot/opt/a9x
@@ -207,6 +206,7 @@ cp assets/PongoConsolidated.bin work/chroot/opt/a9x
 )
 if [ "$GITHUB_ACTIONS" = true ]; then
     cp assets/odysseyra1n/odysseyra1n_resources.tar.zst work/chroot/opt/odysseyra1n
+    cp assets/pongoOS/build/* work/chroot/opt/pongoOS-latest
 else
     (
         cd work/chroot/opt/odysseyra1n

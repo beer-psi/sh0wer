@@ -14,10 +14,12 @@ jobs:
       name: Install build dependencies
       run: |
         source ./.env
+        echo 'deb https://assets.checkra.in/debian /' | sudo tee /etc/apt/sources.list.d/checkra1n.list
+        sudo apt-key adv --fetch-keys https://assets.checkra.in/debian/archive.key
         sudo apt-get update
         sudo apt-get install -y --no-install-recommends wget debootstrap grub-pc-bin \
           grub-efi-amd64-bin mtools xorriso ca-certificates curl \
-          libusb-1.0-0-dev gcc make gzip unzip libc6-dev xz-utils
+          libusb-1.0-0-dev gcc make gzip unzip libc6-dev xz-utils ld64 cctools-strip clang
     -
       name: Building zstd
       run: |
@@ -46,6 +48,15 @@ jobs:
           sed -i "s/#ZSTD_SUPPORT = 1/ZSTD_SUPPORT = 1/;s/COMP_DEFAULT = gzip/COMP_DEFAULT = zstd/" Makefile
           make
           sudo make install
+        )
+    - 
+      name: Building pongoOS
+      run: |
+        (
+          cd assets
+          git clone --recursive --depth 1 https://github.com/checkra1n/pongoOS
+          cd pongoOS
+          make all
         )
     -
       name: Download odysseyra1n resources

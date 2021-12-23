@@ -19,7 +19,8 @@ jobs:
         echo 'deb-src http://apt.llvm.org/focal/ llvm-toolchain-focal main' | sudo tee /etc/apt/sources.list.d/llvm.list
     
         sudo apt-key adv --fetch-keys https://assets.checkra.in/debian/archive.key
-
+        sudo apt-key adv --fetch-keys https://apt.llvm.org/llvm-snapshot.gpg.key
+        
         sudo apt-get update
         sudo apt-get install -y --no-install-recommends wget debootstrap grub-pc-bin \
           grub-efi-amd64-bin mtools xorriso ca-certificates curl \

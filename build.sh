@@ -206,7 +206,7 @@ cp assets/PongoConsolidated.bin work/chroot/opt/a9x
 )
 if [ "$GITHUB_ACTIONS" = true ]; then
     cp assets/odysseyra1n/odysseyra1n_resources.tar.zst work/chroot/opt/odysseyra1n
-    cp assets/pongoOS/build/* work/chroot/opt/pongoOS-latest
+    find assets/pongoOS/build/* -maxdepth 1 -type f -exec cp "{}" work/chroot/opt/pongoOS-latest/ \;
 else
     (
         cd work/chroot/opt/odysseyra1n

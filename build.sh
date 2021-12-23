@@ -151,7 +151,7 @@ if [ "$GITHUB_ACTIONS" = true ]; then
 
     chroot work/chroot apt-get install -y --no-install-recommends python3
     find assets/pongoOS/build/* -maxdepth 1 -type f -exec cp "{}" work/chroot/opt/pongoOS-latest/ \;
-    find assets/pongoOS/scripts/* -maxdepth 1 -type f -name '*.py' cp "{}" work/chroot/usr/local/bin \;
+    find assets/pongoOS/scripts/* -maxdepth 1 -type f -name '*.py' -exec cp "{}" work/chroot/usr/local/bin \;
     rename -f 's/\.py$//' work/chroot/usr/local/bin/*.py
 else
     (

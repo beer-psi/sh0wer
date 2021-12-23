@@ -137,37 +137,6 @@ chroot work/chroot update-initramfs -u
 cp work/chroot/vmlinuz work/iso/boot
 cp work/chroot/initrd.img work/iso/boot
 
-# * Empty unused directories
-(
-    cd work/chroot
-    rm -f etc/mtab \
-        etc/fstab \
-        etc/ssh/ssh_host* \
-        root/.wget-hsts \
-        root/.bash_history \
-        lib/xtables/libip6t_*
-    rm -rf var/log/* \
-        var/cache/* \
-        var/backups/* \
-        var/lib/apt/* \
-        var/lib/dpkg/* \
-        usr/lib/apt/* \
-        usr/lib/locale/* \
-        usr/local/include/* \
-        usr/local/share/man/* \
-        usr/include/* \
-        usr/share/doc/* \
-        usr/share/man/* \
-        usr/share/fonts/* \
-        usr/share/info/* \
-        usr/share/icons/* \
-        usr/share/locale/* \
-        usr/share/zoneinfo/* \
-        usr/share/perl*/* \
-        usr/lib/modules/* \
-        boot/*
-)
-
 # Copying scripts & Downloading resources
 mkdir -p work/chroot/opt/{odysseyra1n,a9x,pongoOS-latest}
 cp scripts/* work/chroot/usr/local/bin
@@ -274,6 +243,39 @@ busybox --list | egrep -v "(busybox)|(init)|(sh)" | while read -r line; do
     fi
 done 
 !
+
+# * Empty unused directories
+(
+    cd work/chroot
+    rm -f etc/mtab \
+        etc/fstab \
+        etc/ssh/ssh_host* \
+        root/.wget-hsts \
+        root/.bash_history \
+        lib/xtables/libip6t_*
+    rm -rf var/log/* \
+        var/cache/* \
+        var/backups/* \
+        var/lib/apt/* \
+        var/lib/dpkg/* \
+        usr/lib/apt/* \
+        usr/lib/locale/* \
+        usr/local/include/* \
+        usr/local/share/man/* \
+        usr/include/* \
+        usr/share/doc/* \
+        usr/share/man/* \
+        usr/share/fonts/* \
+        usr/share/info/* \
+        usr/share/icons/* \
+        usr/share/locale/* \
+        usr/share/zoneinfo/* \
+        usr/share/perl*/* \
+        usr/lib/modules/* \
+        boot/*
+)
+
+
 
 # Stage 4: Build the ISO
 # * Make an zstd-compressed squashfs

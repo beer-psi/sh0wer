@@ -16,10 +16,13 @@ jobs:
         source ./.env
         echo 'deb https://assets.checkra.in/debian /' | sudo tee /etc/apt/sources.list.d/checkra1n.list
         sudo apt-key adv --fetch-keys https://assets.checkra.in/debian/archive.key
+
+        bash -c "$(wget -O - https://apt.llvm.org/llvm.sh)"
+
         sudo apt-get update
         sudo apt-get install -y --no-install-recommends wget debootstrap grub-pc-bin \
           grub-efi-amd64-bin mtools xorriso ca-certificates curl \
-          libusb-1.0-0-dev gcc make gzip unzip libc6-dev xz-utils ld64 cctools-strip clang
+          libusb-1.0-0-dev gcc make gzip unzip libc6-dev xz-utils ld64 cctools-strip
     -
       name: Building zstd
       run: |

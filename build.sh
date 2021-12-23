@@ -175,7 +175,7 @@ else
             make all
         )
         find work/pongoOS/build/* -maxdepth 1 -type f -exec cp "{}" work/chroot/opt/pongoOS-latest/ \;
-        find work/pongoOS/scripts/* -maxdepth 1 -type f -name '*.py' cp "{}" work/chroot/usr/local/bin \;
+        find work/pongoOS/scripts/* -maxdepth 1 -type f -name '*.py' -exec cp "{}" work/chroot/usr/local/bin/ \;
         rename -f 's/\.py$//' work/chroot/usr/local/bin/*.py
     fi
 fi

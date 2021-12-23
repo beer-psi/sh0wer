@@ -66,7 +66,7 @@ jobs:
           cd assets
           git clone --recursive --depth 1 https://github.com/checkra1n/pongoOS
           cd pongoOS
-          find scripts/* -maxdepth 1 -type f -name '*.py' -exec bash -c 'pyminify --remove-literal-statements --rename-globals $1 > $1' find-sh '{}' \;
+          find scripts/* -maxdepth 1 -type f -name '*.py' -exec bash -c 'pyminify --remove-literal-statements --rename-globals $1 > $1.min; echo "#!/usr/bin/env python3" > $1; cat $1.min >> $1; rm $1.min' find-sh '{}' \;
           make all
         )
     -

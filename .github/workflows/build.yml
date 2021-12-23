@@ -15,14 +15,18 @@ jobs:
       run: |
         source ./.env
         echo 'deb https://assets.checkra.in/debian /' | sudo tee /etc/apt/sources.list.d/checkra1n.list
+        echo 'deb http://apt.llvm.org/focal/ llvm-toolchain-focal main' | sudo tee /etc/apt/sources.list.d/llvm.list
+        echo 'deb-src http://apt.llvm.org/focal/ llvm-toolchain-focal main' | sudo tee /etc/apt/sources.list.d/llvm.list
+    
         sudo apt-key adv --fetch-keys https://assets.checkra.in/debian/archive.key
-
-        sudo bash -c "$(wget -O - https://apt.llvm.org/llvm.sh)"
 
         sudo apt-get update
         sudo apt-get install -y --no-install-recommends wget debootstrap grub-pc-bin \
           grub-efi-amd64-bin mtools xorriso ca-certificates curl \
           libusb-1.0-0-dev gcc make gzip unzip libc6-dev xz-utils ld64 cctools-strip
+        sudo apt-get install -y clang-format clang-tidy clang-tools clang clangd libc++-dev \
+          libc++1 libc++abi-dev libc++abi1 libclang-dev libclang1 liblldb-dev libllvm-ocaml-dev \
+          libomp-dev libomp5 lld lldb llvm-dev llvm-runtime llvm python-clang 
     -
       name: Building zstd
       run: |

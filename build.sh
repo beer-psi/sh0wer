@@ -148,11 +148,12 @@ cp assets/PongoConsolidated.bin work/chroot/opt/a9x
 )
 if [ "$GITHUB_ACTIONS" = true ]; then
     cp assets/odysseyra1n/odysseyra1n_resources.tar.zst work/chroot/opt/odysseyra1n
-
-    chroot work/chroot apt-get install -y --no-install-recommends python3
-    find assets/pongoOS/build/* -maxdepth 1 -type f -exec cp "{}" work/chroot/opt/pongoOS-latest/ \;
-    find assets/pongoOS/scripts/* -maxdepth 1 -type f -name '*.py' -exec cp "{}" work/chroot/usr/local/bin \;
-    rename -f 's/\.py$//' work/chroot/usr/local/bin/*.py
+    if [ "$PONGO_LATEST" = 'YES' ]; then
+        chroot work/chroot apt-get install -y --no-install-recommends python3
+        find assets/pongoOS/build/* -maxdepth 1 -type f -exec cp "{}" work/chroot/opt/pongoOS-latest/ \;
+        find assets/pongoOS/scripts/* -maxdepth 1 -type f -name '*.py' -exec cp "{}" work/chroot/usr/local/bin \;
+        rename -f 's/\.py$//' work/chroot/usr/local/bin/*.py
+    fi
 else
     (
         cd work/chroot/opt/odysseyra1n

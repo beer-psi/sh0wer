@@ -10,6 +10,13 @@ jobs:
     - 
       name: Checkout
       uses: actions/checkout@v2
+    - 
+      name: Get build config
+      id: buildconfig
+      shell: bash
+      run: |
+        source ./.env
+        echo "::set-output name=pongo::${PONGO_LATEST}"
     -
       name: Install build dependencies
       run: |
@@ -59,6 +66,7 @@ jobs:
         )
     - 
       name: Building pongoOS
+      if: "contains(steps.buildconfig.outputs.pongo, 'YES')"
       run: |
         (
           cd assets

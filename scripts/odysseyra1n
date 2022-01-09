@@ -52,9 +52,9 @@ else
 fi
 mount -o rw,union,update /dev/disk0s1s1
 rm -rf /etc/{alternatives,apt,ssl,ssh,dpkg,profile{,.d}} /Library/dpkg /var/{cache,lib}
-tar --preserve-permissions -xkf bootstrap_${CFVER}.tar -C /
 SNAPSHOT=$(snappy -s | cut -d ' ' -f 3 | tr -d '\n')
 snappy -f / -r "$SNAPSHOT" -t orig-fs > /dev/null 2>&1
+tar --preserve-permissions -xkf bootstrap_${CFVER}.tar -C /
 /prep_bootstrap.sh
 PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/bin/X11:/usr/games
 if [[ $VER = 12.1* ]] || [[ $VER = 12.0* ]]; then

@@ -105,7 +105,7 @@ else
     ERRORED=1
 fi
 
-if [ $ERRORED -eq 1 ]; then
+if [ "$ERRORED" = "1" ]; then
     failed_echo "The script failed! Please try again"
 else 
     success_echo "Done!"

@@ -38,16 +38,12 @@ Open File Explorer, right click This PC and select Properties, look for the line
   
 </details>
 
-1. Get the latest "Release" ISO from the [Releases tab](https://github.com/extradummythicc/sh0wer/releases)
-2. Get the ROSA Image Writer [here](http://wiki.rosalab.ru/en/images/6/62/RosaImageWriter-2.6.2-win.zip). If another USB flashing tool (like balenaEtcher) floats your boat, you can use it instead.
-3. Open ROSA Image Writer and write the downloaded ISO to your USB:
-![ROSA](http://wiki.rosalab.ru/en/images/0/0b/RosaImageWriter-2.6-eng.png)
-    - For `Image`, select the ISO file you've just downloaded
-    - For `USB Device`, select the USB you've just connected (double check with File Explorer if you're unsure)
-    - Press `Write` when you have selected both.
-4. Reboot, enter your BIOS menu (you'll have to google for this) and select to boot from the USB.
+**I will only support Ventoy, use other tools at your own risk**
 
-After you're done using sh0wer, if you want to wipe your USB so you can use it normally, just use the "Clear" button inside ROSA.
+1. Get the latest Ventoy for Windows here: https://github.com/ventoy/Ventoy/releases
+2. After downloading and extracting the Ventoy .zip file, connect your USB flash drive then open the Ventoy2Disk.exe program. Back up any files on the USB now, you can copy them back later.
+3. Select your USB flash drive at the top then press Install. You will be prompted twice to confirm that you are okay with deleting all data on the drive.
+4. Copy the Odysseyn1x .iso file to the newly-flashed "Ventoy" USB.
 
 # Building sh0wer
 ## Installing build dependencies

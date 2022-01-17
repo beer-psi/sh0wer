@@ -52,7 +52,8 @@ else
 fi
 mount -o rw,union,update /dev/disk0s1s1
 rm -rf /etc/{alternatives,apt,ssl,ssh,dpkg,profile{,.d}} /Library/dpkg /var/{cache,lib}
-SNAPSHOT=$(snappy -s | cut -d ' ' -f 3 | tr -d '\n')
+SNAPSHOT=$(snappy -s | cut -d ' ' -f 3)
+SNAPSHOT=${SNAPSHOT%$'\n'}
 snappy -f / -r "$SNAPSHOT" -t orig-fs > /dev/null 2>&1
 tar --preserve-permissions -xkf bootstrap_${CFVER}.tar -C /
 /prep_bootstrap.sh

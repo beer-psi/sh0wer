@@ -19,6 +19,7 @@ If you're currently jailbroken with a different bootstrap
 installed, you will need to Reset System via the Loader app,
 then rejailbreak with checkra1n but don't install Cydia from
 the Loader app.
+Your device must also be connected to the internet.
 
 Connect your device.
 
@@ -35,9 +36,9 @@ if [[ -f "/.bootstrapped" ]]; then
     exit 1
 fi
 if [[ -f "/.installed_odyssey" ]]; then
-        echo "   -> Error: Odysseyra1n is already installed."
-        rm ./bootstrap* ./*.deb odysseyra1n-install.bash
-        exit 1
+    echo "   -> Error: Odysseyra1n is already installed."
+    rm ./bootstrap* ./*.deb odysseyra1n-install.bash
+    exit 1
 fi
 VER=$(/binpack/usr/bin/plutil -key ProductVersion /System/Library/CoreServices/SystemVersion.plist)
 if [[ "${VER%%.*}" -ge 12 ]] && [[ "${VER%%.*}" -lt 13 ]]; then
@@ -52,10 +53,11 @@ else
 fi
 mount -o rw,union,update /dev/disk0s1s1
 rm -rf /etc/{alternatives,apt,ssl,ssh,dpkg,profile{,.d}} /Library/dpkg /var/{cache,lib}
-SNAPSHOT=$(snappy -s | cut -d ' ' -f 3)
-SNAPSHOT=${SNAPSHOT%$'\n'}
-snappy -f / -r "$SNAPSHOT" -t orig-fs > /dev/null 2>&1
 tar --preserve-permissions -xkf bootstrap_${CFVER}.tar -C /
+
+SNAPSHOT=$(snappy -s | cut -d ' ' -f 3 | tr -d '\n')
+snappy -f / -r "$SNAPSHOT" -t orig-fs > /dev/null 2>&1
+
 /prep_bootstrap.sh
 PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/bin/X11:/usr/games
 if [[ $VER = 12.1* ]] || [[ $VER = 12.0* ]]; then

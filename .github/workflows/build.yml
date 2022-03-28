@@ -5,6 +5,11 @@ on: [workflow_dispatch,push]
 jobs:
   build:
     if: "!contains(github.event.head_commit.message, 'skip-ci')" 
+    strategy:
+      matrix:
+        arch:
+        - x86_64
+        - x86
     runs-on: ubuntu-latest
     steps:
     - 
@@ -35,25 +40,7 @@ jobs:
         sudo apt-get install -y clang-format clang-tidy clang-tools clang clangd libc++-dev \
           libc++1 libc++abi-dev libc++abi1 libclang-dev libclang1 liblldb-dev libllvm-ocaml-dev \
           libomp-dev libomp5 lld lldb llvm-dev llvm-runtime llvm python-clang 
-    -
-      name: Building zstd
-      run: |
-        source ./.env
-        [ -z "$ZSTD" ] && {
-          ZSTD="https://github.com$(curl -s https://github.com/facebook/zstd/releases | grep -Po "/facebook\/zstd/releases/download/v[\d.]+/zstd-[\d.]+\.tar\.gz" | head -1)"
-        }
-
-        # gotta get 1.5.0
-        (
-          curl -LO $ZSTD
-          sudo tar xf zstd*.tar.gz -C /opt
-          cd /opt/zstd*
-          sudo make
-          sudo make install
-        )
-        sudo ln -sf /usr/local/bin/zstd /usr/bin/zstd
-        sudo ln -sf /usr/local/lib/libzstd.so.*.* /usr/lib/x86_64-linux-gnu/libzstd.so
-        sudo ln -sf /usr/local/lib/libzstd.so.*.* /usr/lib/x86_64-linux-gnu/libzstd.so.1
+        brew install zstd
     -
       name: Building squashfs-tools with zstd support
       run: |
@@ -94,16 +81,11 @@ jobs:
           find ./* -not -name "odysseyra1n_resources.tar.zst" -delete
         )
     - 
-      name: Build for x86_64
+      name: Build
       run: |
-        sed -i "s/ARCH=''/ARCH='x86_64'/" .env
+        sed -i "s/ARCH=''/ARCH='${{ matrix.arch }}'/" .env
         sudo chmod 755 build.sh
 
-        sudo -E ./build.sh
-    - 
-      name: Build for x86
-      run: |
-        sed -i "s/ARCH='x86_64'/ARCH='x86'/" .env
         sudo -E ./build.sh
     -
       name: Upload artifacts

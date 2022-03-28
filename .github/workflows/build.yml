@@ -49,7 +49,7 @@ jobs:
         (
           cd squashfs-tools/squashfs-tools
           sed -i "s/#ZSTD_SUPPORT = 1/ZSTD_SUPPORT = 1/;s/COMP_DEFAULT = gzip/COMP_DEFAULT = zstd/" Makefile
-          sed -i "s/INCLUDEDIR = -I./INCLUDEDIR = -I. -I\/usr\/local\/include -L\/usr\/local\/lib /" Makefile
+          sed -i "s/INCLUDEDIR = -I./INCLUDEDIR = -I. -I\/home\/linuxbrew\/.linuxbrew\/include -L\/home\/linuxbrew\/.linuxbrew\/lib /" Makefile
           make
           sudo make install
         )

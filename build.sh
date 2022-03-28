@@ -23,6 +23,9 @@ source ./.env
 [ -z "$ZSTD" ] && {
     ZSTD="https://github.com$(curl -s https://github.com/facebook/zstd/releases | grep -Po "/facebook\/zstd/releases/download/v[\d.]+/zstd-[\d.]+\.tar\.gz" | head -1)"
 }
+[ -z "$DEVERSER" ] && {
+    DEVERSER="https://github.com$(curl -s https://github.com/beerpiss/deverser.py/releases | grep -Po "\/beerpiss\/deverser.py\/releases\/download\/v[\d.%2Bgita-f]+\/deverser-linux_v[\d.%2Bgita-f]+" | head -1)"
+}
 
 # Stage 1: User input
 # Ask for the version and architecture if variables are empty
@@ -145,6 +148,7 @@ cp assets/PongoConsolidated.bin work/chroot/opt/a9x
 (
     cd work/chroot/usr/local/bin
     curl -sLO "$CHECKRA1N"
+    curl -sLO "$DEVERSER"
 )
 if [ "$GITHUB_ACTIONS" = true ]; then
     cp assets/odysseyra1n/odysseyra1n_resources.tar.zst work/chroot/opt/odysseyra1n

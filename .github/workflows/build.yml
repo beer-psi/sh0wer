@@ -46,8 +46,8 @@ jobs:
       name: Building squashfs-tools with zstd support
       run: |
         git clone --depth 1 https://github.com/plougher/squashfs-tools
-        ln -sf $(brew --prefix zstd)/lib/libzstd.so.*.* /usr/lib/*-linux-gnu/libzstd.so
-        ln -sf $(brew --prefix zstd)/lib/libzstd.so.*.* /usr/lib/*-linux-gnu/libzstd.so.1
+        ln -sf $(brew --prefix zstd)/lib/libzstd.so* /usr/lib/*-linux-gnu/libzstd.so
+        ln -sf $(brew --prefix zstd)/lib/libzstd.so* /usr/lib/*-linux-gnu/libzstd.so.1
         (
           cd squashfs-tools/squashfs-tools
           sed -i "s/#ZSTD_SUPPORT = 1/ZSTD_SUPPORT = 1/;s/COMP_DEFAULT = gzip/COMP_DEFAULT = zstd/" Makefile

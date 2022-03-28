@@ -6,6 +6,7 @@ jobs:
   build:
     if: "!contains(github.event.head_commit.message, 'skip-ci')" 
     strategy:
+      fail-fast: false
       matrix:
         arch:
         - x86_64
@@ -48,6 +49,7 @@ jobs:
         (
           cd squashfs-tools/squashfs-tools
           sed -i "s/#ZSTD_SUPPORT = 1/ZSTD_SUPPORT = 1/;s/COMP_DEFAULT = gzip/COMP_DEFAULT = zstd/" Makefile
+          sed -i "s/INCLUDEDIR = -I./INCLUDEDIR = -I. -I\/usr\/local\/include -L\/usr\/local\/lib /" Makefile
           make
           sudo make install
         )
